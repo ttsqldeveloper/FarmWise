@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmWise Advisor - Your Farming Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #48bb78;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #48bb78;
+        }
+
+        button {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        button.secondary {
+            background: #4299e1;
+        }
+
+        button.secondary:hover {
+            background: #3182ce;
+        }
+
+        button.danger {
+            background: #f56565;
+        }
+
+        button.danger:hover {
+            background: #e53e3e;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* Advice items */
+        .advice-item {
+            background: #f7fafc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #48bb78;
+        }
+
+        .advice-item h4 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .advice-item p {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        /* Reminder items */
+        .reminder-item {
+            background: #f7fafc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid;
+        }
+
+        .reminder-item.high { border-left-color: #f56565; }
+        .reminder-item.medium { border-left-color: #ed8936; }
+        .reminder-item.low { border-left-color: #48bb78; }
+
+        .reminder-content h4 {
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .reminder-content p {
+            color: #718096;
+            font-size: 12px;
+        }
+
+        /* Chat area */
+        .chat-area {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .chat-message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .chat-user {
+            background: #48bb78;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .chat-bot {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        /* Stats cards */
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none;
+        }
+
+        /* Status messages */
+        .status {
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #48bb78;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 FarmWise Advisor</h1>
+            <p>Your AI-powered farming companion for crops and livestock management</p>
+            <div class="badge">🚀 For New Farmers | 🌍 Multi-Region | 💡 Smart Advice</div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="card">
+            <h2>🔐 Welcome to FarmWise</h2>
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="demo@farmwise.com" value="demo@farmwise.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="password123" value="password123">
+                    </div>
+                    <button onclick="login()">🚜 Login to Dashboard</button>
+                    <button onclick="showRegister()" class="secondary">📝 Create New Account</button>
+                </div>
+                <div>
+                    <div class="status status-success" id="serverStatus">
+                        ✅ Server Connected
+                    </div>
+                    <p style="color: #718096; margin-top: 15px;">
+                        <strong>📋 Demo Account:</strong><br>
+                        Email: demo@farmwise.com<br>
+                        Password: password123<br><br>
+                        <strong>💡 Features:</strong><br>
+                        • Personalized farming advice<br>
+                        • AI chatbot assistant<br>
+                        • Smart reminders<br>
+                        • Seasonal tips
+                    </p>
+                </div>
+            </div>
+            <div id="loginMessage"></div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="card hidden">
+            <h2>📝 Create Your Farm Account</h2>
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="regName" placeholder="John Farmer">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="regEmail" placeholder="farmer@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" placeholder="At least 6 characters">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Your Region/Climate</label>
+                        <select id="regRegion">
+                            <option value="tropical">🌴 Tropical (Warm & Humid)</option>
+                            <option value="arid">🏜️ Arid (Dry)</option>
+                            <option value="temperate">🌳 Temperate (Four Seasons)</option>
+                            <option value="mediterranean">🍋 Mediterranean</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Farm Type</label>
+                        <select id="regFarmType">
+                            <option value="crops">🌾 Crops / Plants</option>
+                            <option value="livestock">🐄 Livestock / Animals</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button onclick="register()">Create Account</button>
+            <button onclick="hideRegister()" class="danger">Back to Login</button>
+            <div id="registerMessage"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <!-- Welcome Banner -->
+            <div class="card" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white;">
+                <h2 id="welcomeMessage" style="color: white; border-bottom: none;">Welcome, Farmer! 🌱</h2>
+                <p>Your personalized farming dashboard is ready. Get expert advice, manage tasks, and ask our AI assistant.</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="adviceCount">0</div>
+                    <div>💡 Tips Available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="reminderCount">0</div>
+                    <div>⏰ Active Reminders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="chatCount">0</div>
+                    <div>💬 Conversations</div>
+                </div>
+            </div>
+
+            <!-- Profile & Advice -->
+            <div class="grid-2">
+                <div class="card">
+                    <h2>👤 Your Farm Profile</h2>
+                    <div id="farmProfile"></div>
+                    <button onclick="refreshProfile()" class="secondary">Refresh Profile</button>
+                </div>
+                <div class="card">
+                    <h2>💡 Personalized Tips</h2>
+                    <button onclick="loadAdvice()">🔄 Refresh Tips</button>
+                    <div id="adviceList"></div>
+                </div>
+            </div>
+
+            <!-- AI Chatbot -->
+            <div class="card">
+                <h2>🤖 FarmWise AI Assistant</h2>
+                <div class="chat-area" id="chatArea">
+                    <div class="chat-message chat-bot">
+                        🤖 Hello! I'm your farming assistant. Ask me anything about:<br>
+                        • Crop diseases and treatment<br>
+                        • Watering schedules<br>
+                        • Vaccination schedules<br>
+                        • Animal feeding<br>
+                        • Seasonal preparation
+                    </div>
+                </div>
+                <div class="grid-2" style="gap: 10px;">
+                    <input type="text" id="chatQuestion" placeholder="Ask a question... (e.g., How to treat tomato blight?)">
+                    <button onclick="askQuestion()">Send Message</button>
+                </div>
+            </div>
+
+            <!-- Reminders -->
+            <div class="card">
+                <h2>⏰ Smart Reminders</h2>
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <input type="text" id="reminderTitle" placeholder="Reminder title">
+                    <input type="date" id="reminderDate">
+                </div>
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <select id="reminderPriority">
+                        <option value="high">🔴 High Priority</option>
+                        <option value="medium" selected>🟡 Medium Priority</option>
+                        <option value="low">🟢 Low Priority</option>
+                    </select>
+                    <button onclick="createReminder()">➕ Add Reminder</button>
+                </div>
+                <div id="reminderList"></div>
+            </div>
+
+            <!-- Logout -->
+            <div style="text-align: center;">
+                <button onclick="logout()" class="danger">🚪 Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        const API_URL = 'http://localhost:3001';
+
+        // Check server status
+        async function checkServer() {
+            try {
+                const res = await fetch(`${API_URL}/api/health`);
+                if (res.ok) {
+                    document.getElementById('serverStatus').innerHTML = '✅ Server Connected - Ready!';
+                    document.getElementById('serverStatus').className = 'status status-success';
+                }
+            } catch (error) {
+                document.getElementById('serverStatus').innerHTML = '❌ Server Not Connected';
+                document.getElementById('serverStatus').className = 'status status-error';
+            }
+        }
+
+        // Login function
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showMessage('loginMessage', 'Please enter email and password', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('welcomeMessage').innerHTML = `Welcome, ${data.user.name}! 🌱`;
+                    
+                    // Load dashboard data
+                    loadFarmProfile();
+                    loadAdvice();
+                    loadReminders();
+                    updateStats();
+                } else {
+                    showMessage('loginMessage', data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Connection error: ' + error.message, 'error');
+            }
+        }
+
+        // Register function
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const region = document.getElementById('regRegion').value;
+            const farm_type = document.getElementById('regFarmType').value;
+
+            if (!name || !email || !password) {
+                showMessage('registerMessage', 'Please fill all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('registerMessage', 'Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, region, farm_type })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage('registerMessage', '✅ Registration successful! You can now login.', 'success');
+                    setTimeout(() => {
+                        hideRegister();
+                        document.getElementById('email').value = email;
+                        document.getElementById('password').value = password;
+                    }, 2000);
+                } else {
+                    showMessage('registerMessage', data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('registerMessage', 'Connection error: ' + error.message, 'error');
+            }
+        }
+
+        // Load farm profile
+        async function loadFarmProfile() {
+            try {
+                const res = await fetch(`${API_URL}/api/farm/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.profile) {
+                    const p = data.profile;
+                    document.getElementById('farmProfile').innerHTML = `
+                        <p><strong>📧 Email:</strong> ${p.email}</p>
+                        <p><strong>👤 Name:</strong> ${p.name}</p>
+                        <p><strong>🌍 Region:</strong> ${p.region}</p>
+                        <p><strong>🌾 Farm Type:</strong> ${p.farm_type}</p>
+                        ${p.crop_type ? `<p><strong>🌱 Main Crop:</strong> ${p.crop_type}</p>` : ''}
+                        ${p.livestock_type ? `<p><strong>🐄 Livestock:</strong> ${p.livestock_type}</p>` : ''}
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('farmProfile').innerHTML = '<p>Error loading profile</p>';
+            }
+        }
+
+        // Load advice
+        async function loadAdvice() {
+            try {
+                const res = await fetch(`${API_URL}/api/advice/personalized`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.advice) {
+                    const adviceList = document.getElementById('adviceList');
+                    adviceList.innerHTML = '';
+                    data.advice.forEach(advice => {
+                        adviceList.innerHTML += `
+                            <div class="advice-item">
+                                <h4>${advice.title}</h4>
+                                <p>${advice.content}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('adviceCount').innerText = data.advice.length;
+                }
+            } catch (error) {
+                document.getElementById('adviceList').innerHTML = '<p>Error loading advice</p>';
+            }
+        }
+
+        // Ask chatbot
+        async function askQuestion() {
+            const question = document.getElementById('chatQuestion').value;
+            if (!question) return;
+
+            // Add user message
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML += `
+                <div class="chat-message chat-user">
+                    👤 ${escapeHtml(question)}
+                </div>
+            `;
+            document.getElementById('chatQuestion').value = '';
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            try {
+                const res = await fetch(`${API_URL}/api/chatbot/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+                
+                chatArea.innerHTML += `
+                    <div class="chat-message chat-bot">
+                        🤖 ${escapeHtml(data.answer)}
+                    </div>
+                `;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } catch (error) {
+                chatArea.innerHTML += `
+                    <div class="chat-message chat-bot">
+                        🤖 Sorry, I'm having trouble connecting. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Load reminders
+        async function loadReminders() {
+            try {
+                const res = await fetch(`${API_URL}/api/reminders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                const reminderList = document.getElementById('reminderList');
+                if (data.reminders && data.reminders.length > 0) {
+                    reminderList.innerHTML = '';
+                    data.reminders.forEach(reminder => {
+                        reminderList.innerHTML += `
+                            <div class="reminder-item ${reminder.priority}">
+                                <div class="reminder-content">
+                                    <h4>${escapeHtml(reminder.title)}</h4>
+                                    <p>Due: ${reminder.due_date || 'No date'} | Priority: ${reminder.priority}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('reminderCount').innerText = data.reminders.length;
+                } else {
+                    reminderList.innerHTML = '<p>No reminders yet. Create your first reminder above!</p>';
+                    document.getElementById('reminderCount').innerText = '0';
+                }
+            } catch (error) {
+                document.getElementById('reminderList').innerHTML = '<p>Error loading reminders</p>';
+            }
+        }
+
+        // Create reminder
+        async function createReminder() {
+            const title = document.getElementById('reminderTitle').value;
+            const due_date = document.getElementById('reminderDate').value;
+            const priority = document.getElementById('reminderPriority').value;
+
+            if (!title) {
+                alert('Please enter a reminder title');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/reminders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, due_date, priority })
+                });
+                
+                if (res.ok) {
+                    document.getElementById('reminderTitle').value = '';
+                    document.getElementById('reminderDate').value = '';
+                    loadReminders();
+                    updateStats();
+                } else {
+                    alert('Failed to create reminder');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Update stats
+        async function updateStats() {
+            try {
+                const res = await fetch(`${API_URL}/api/reminders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.reminders) {
+                    document.getElementById('reminderCount').innerText = data.reminders.length;
+                }
+            } catch (error) {
+                console.error('Error updating stats');
+            }
+        }
+
+        // Refresh profile
+        async function refreshProfile() {
+            await loadFarmProfile();
+            showMessage('farmProfile', 'Profile refreshed!', 'success');
+        }
+
+        // Show register form
+        function showRegister() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+        }
+
+        // Hide register form
+        function hideRegister() {
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // Logout
+        function logout() {
+            token = '';
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('email').value = 'demo@farmwise.com';
+            document.getElementById('password').value = 'password123';
+        }
+
+        // Show message
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status status-${type === 'error' ? 'error' : 'success'}">${message}</div>`;
+            setTimeout(() => {
+                if (element.innerHTML.includes(message)) {
+                    element.innerHTML = '';
+                }
+            }, 3000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Check server on load
+        checkServer();
+    </script>
+</body>
+</html>
