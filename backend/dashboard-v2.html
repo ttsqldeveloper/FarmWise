@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmWise v2.0 | Intelligent Farming Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Glass Morphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a4731 0%, #0f2e20 100%);
+            border-radius: 24px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.05)" d="M20,20 L30,20 L25,30 Z M70,70 L80,70 L75,80 Z M40,80 L50,80 L45,90 Z"/></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        .feature-tag {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a4731;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: #48bb78;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: #48bb78;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            background: white;
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: #48bb78;
+            color: white;
+        }
+
+        /* Analytics Chart */
+        .chart-container {
+            margin-top: 20px;
+        }
+
+        .monthly-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .month-name {
+            width: 40px;
+            font-weight: 500;
+        }
+
+        .bar {
+            flex: 1;
+            height: 30px;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 8px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Forum Posts */
+        .forum-post {
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #f7fafc;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .forum-post:hover {
+            background: white;
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: #48bb78;
+            font-size: 0.85rem;
+        }
+
+        .post-category {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            background: #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .post-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            color: #a0aec0;
+            margin-top: 8px;
+        }
+
+        /* Market Prices */
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .price-commodity {
+            font-weight: 600;
+        }
+
+        .price-value {
+            font-weight: 700;
+            color: #1a4731;
+        }
+
+        .trend-up {
+            color: #48bb78;
+        }
+
+        .trend-down {
+            color: #f56565;
+        }
+
+        /* New Feature Badge */
+        .new-feature {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🌱 FarmWise <span class="version-badge">v2.0</span></h1>
+                    <p style="margin-top: 5px; opacity: 0.8;">Intelligent Farming Platform</p>
+                </div>
+                <div class="feature-tag">
+                    <i class="fas fa-globe"></i> Multi-Language | <i class="fas fa-chart-line"></i> Analytics | <i class="fas fa-users"></i> Community
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="glass-card" style="max-width: 450px; margin: 60px auto; padding: 40px; text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🌾</div>
+            <h2 style="margin-bottom: 10px;">Welcome to FarmWise v2.0</h2>
+            <p style="color: #718096; margin-bottom: 30px;">Multi-Language | Analytics | Community | Market Prices</p>
+            <input type="email" id="loginEmail" placeholder="Email" value="demo@farmwise.com" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 12px;">
+            <input type="password" id="loginPassword" placeholder="Password" value="password123" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 12px;">
+            <button onclick="login()" style="width: 100%; padding: 14px; background: #48bb78; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">Login to v2.0</button>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #a0aec0;">Demo: demo@farmwise.com / password123</p>
+        </div>
+
+        <!-- Dashboard v2.0 -->
+        <div id="dashboard" class="hidden">
+            <!-- Language Selector Row -->
+            <div class="glass-card" style="margin-bottom: 20px; padding: 15px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <i class="fas fa-language" style="color: #48bb78;"></i>
+                    <span style="margin-left: 8px; font-weight: 500;">Select Language:</span>
+                </div>
+                <div class="language-selector">
+                    <button class="lang-btn active" onclick="changeLanguage('en')">🇬🇧 English</button>
+                    <button class="lang-btn" onclick="changeLanguage('sw')">🇹🇿 Kiswahili</button>
+                    <button class="lang-btn" onclick="changeLanguage('es')">🇪🇸 Español</button>
+                </div>
+                <div>
+                    <span class="new-feature"><i class="fas fa-star"></i> v2.0 New!</span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">🌾</div>
+                    <div class="stat-value" id="statYield">0</div>
+                    <div class="stat-label" id="labelYield">Total Yield (kg)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" id="statRevenue">0</div>
+                    <div class="stat-label" id="labelRevenue">Revenue ($)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value" id="statProfit">0</div>
+                    <div class="stat-label" id="labelProfit">Profit ($)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="statHealth">100%</div>
+                    <div class="stat-label" id="labelHealth">Farm Health Score</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Analytics Card -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> <span id="titleAnalytics">Analytics Dashboard</span></h2>
+                        <span class="new-feature">v2.0</span>
+                    </div>
+                    <div id="analyticsContent">
+                        <div class="chart-container" id="monthlyChart"></div>
+                        <div style="margin-top: 20px;">
+                            <h4 style="margin-bottom: 10px;" id="labelCropPerformance">Crop Performance</h4>
+                            <div id="cropPerformance"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Community Forum Card -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-users"></i> <span id="titleForum">Community Forum</span></h2>
+                        <span class="new-feature">Live</span>
+                    </div>
+                    <div id="forumContent">
+                        <div class="forum-post" onclick="openNewPost()">
+                            <div class="post-header">
+                                <span class="post-author"><i class="fas fa-plus-circle"></i> Create New Post</span>
+                            </div>
+                        </div>
+                        <div id="forumPosts"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Prices Card -->
+            <div class="glass-card card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-simple"></i> <span id="titleMarket">Market Prices</span></h2>
+                    <span class="new-feature">Real-time</span>
+                </div>
+                <div id="marketContent"></div>
+            </div>
+
+            <!-- Logout -->
+            <div style="text-align: center; margin-top: 24px; margin-bottom: 30px;">
+                <button onclick="logout()" style="background: #f56565; padding: 12px 30px; border: none; border-radius: 30px; color: white; cursor: pointer;">
+                    <i class="fas fa-sign-out-alt"></i> <span id="btnLogout">Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        let currentLang = 'en';
+        const API_URL = 'http://localhost:3001';
+
+        // Translations
+        const translations = {
+            en: {
+                yield: 'Total Yield (kg)',
+                revenue: 'Revenue ($)',
+                profit: 'Profit ($)',
+                health: 'Farm Health Score',
+                analytics: 'Analytics Dashboard',
+                forum: 'Community Forum',
+                market: 'Market Prices',
+                logout: 'Logout',
+                cropPerformance: 'Crop Performance',
+                monthlyTrends: 'Monthly Trends'
+            },
+            sw: {
+                yield: 'Mavuno Jumla (kg)',
+                revenue: 'Mapato ($)',
+                profit: 'Faida ($)',
+                health: 'Alama ya Afya ya Shamba',
+                analytics: 'Dashibodi ya Uchambuzi',
+                forum: 'Jukwaa la Jamii',
+                market: 'Bei za Soko',
+                logout: 'Toka',
+                cropPerformance: 'Utendaji wa Mazao',
+                monthlyTrends: 'Mwelekeo wa Kila Mwezi'
+            },
+            es: {
+                yield: 'Rendimiento Total (kg)',
+                revenue: 'Ingresos ($)',
+                profit: 'Ganancia ($)',
+                health: 'Puntaje de Salud de la Granja',
+                analytics: 'Panel de Análisis',
+                forum: 'Foro Comunitario',
+                market: 'Precios de Mercado',
+                logout: 'Cerrar Sesión',
+                cropPerformance: 'Rendimiento de Cultivos',
+                monthlyTrends: 'Tendencias Mensuales'
+            }
+        };
+
+        function updateUILanguage() {
+            const t = translations[currentLang];
+            document.getElementById('labelYield').innerText = t.yield;
+            document.getElementById('labelRevenue').innerText = t.revenue;
+            document.getElementById('labelProfit').innerText = t.profit;
+            document.getElementById('labelHealth').innerText = t.health;
+            document.getElementById('titleAnalytics').innerText = t.analytics;
+            document.getElementById('titleForum').innerText = t.forum;
+            document.getElementById('titleMarket').innerText = t.market;
+            document.getElementById('btnLogout').innerText = t.logout;
+            document.getElementById('labelCropPerformance').innerText = t.cropPerformance;
+            
+            // Update active button style
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((currentLang === 'en' && btn.innerText.includes('English')) ||
+                    (currentLang === 'sw' && btn.innerText.includes('Kiswahili')) ||
+                    (currentLang === 'es' && btn.innerText.includes('Español'))) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            updateUILanguage();
+            showToast(`Language changed to ${lang.toUpperCase()}`, 'success');
+            
+            // Save language preference to server
+            if (token) {
+                fetch(`${API_URL}/api/user/language`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ language: lang })
+                }).catch(console.error);
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="color: ${type === 'success' ? '#48bb78' : '#f56565'}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    showToast('Welcome to FarmWise v2.0!', 'success');
+                    loadDashboardData();
+                } else {
+                    showToast(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error', 'error');
+            }
+        }
+
+        async function loadDashboardData() {
+            await loadAnalytics();
+            await loadForumPosts();
+            await loadMarketPrices();
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch(`${API_URL}/api/analytics/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    document.getElementById('statYield').innerText = data.summary.total_yield || 0;
+                    document.getElementById('statRevenue').innerText = data.summary.total_revenue || 0;
+                    document.getElementById('statProfit').innerText = data.summary.profit || 0;
+                    document.getElementById('statHealth').innerText = data.summary.farm_health_score + '%';
+                    
+                    // Render monthly chart
+                    if (data.monthly_trends) {
+                        const months = Object.keys(data.monthly_trends);
+                        const maxValue = Math.max(...Object.values(data.monthly_trends).map(v => v.revenue || 0), 100);
+                        
+                        let chartHtml = `<h4 style="margin-bottom: 15px;">${translations[currentLang].monthlyTrends}</h4>`;
+                        months.slice(-6).forEach(month => {
+                            const revenue = data.monthly_trends[month].revenue || 0;
+                            const width = (revenue / maxValue * 100) + '%';
+                            chartHtml += `
+                                <div class="monthly-bar">
+                                    <div class="month-name">${month}</div>
+                                    <div class="bar" style="width: ${width}">
+                                        ${revenue > 0 ? '$' + revenue : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        document.getElementById('monthlyChart').innerHTML = chartHtml;
+                    }
+                    
+                    // Render crop performance
+                    if (data.crop_performance && Object.keys(data.crop_performance).length > 0) {
+                        let cropHtml = '';
+                        for (const [crop, perf] of Object.entries(data.crop_performance)) {
+                            cropHtml += `<div class="price-item"><span>🌾 ${crop}</span><span class="price-value">${perf.total} kg</span></div>`;
+                        }
+                        document.getElementById('cropPerformance').innerHTML = cropHtml;
+                    } else {
+                        document.getElementById('cropPerformance').innerHTML = '<p style="color: #a0aec0;">No crop data yet. Add farm activities!</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+            }
+        }
+
+        async function loadForumPosts() {
+            try {
+                const res = await fetch(`${API_URL}/api/forum/posts`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.posts) {
+                    const container = document.getElementById('forumPosts');
+                    if (data.posts.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #a0aec0;">No posts yet. Be the first to start a discussion!</div>';
+                    } else {
+                        container.innerHTML = data.posts.slice(0, 5).map(post => `
+                            <div class="forum-post">
+                                <div class="post-header">
+                                    <span class="post-author">👤 ${post.user_name}</span>
+                                    <span class="post-category">${post.category}</span>
+                                </div>
+                                <div class="post-title">${post.title}</div>
+                                <div class="post-stats">
+                                    <span><i class="fas fa-thumbs-up"></i> ${post.likes}</span>
+                                    <span><i class="fas fa-comment"></i> ${post.comments?.length || 0}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load forum:', error);
+            }
+        }
+
+        async function loadMarketPrices() {
+            try {
+                const res = await fetch(`${API_URL}/api/market/prices`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.prices) {
+                    const container = document.getElementById('marketContent');
+                    if (data.prices.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #a0aec0;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Add market prices to track trends!
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = data.prices.map(price => `
+                            <div class="price-item">
+                                <span class="price-commodity">🌾 ${price.commodity}</span>
+                                <span class="price-value">$${price.price}/${price.unit}</span>
+                                <span class="${price.trend === 'up' ? 'trend-up' : 'trend-down'}">
+                                    ${price.trend === 'up' ? '▲' : '▼'}
+                                </span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load market prices:', error);
+            }
+        }
+
+        function openNewPost() {
+            const title = prompt('Enter post title:');
+            if (!title) return;
+            const content = prompt('Enter post content:');
+            if (!content) return;
+            
+            createForumPost(title, content);
+        }
+
+        async function createForumPost(title, content) {
+            try {
+                const res = await fetch(`${API_URL}/api/forum/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content, category: 'general' })
+                });
+                
+                if (res.ok) {
+                    showToast('Post created successfully!', 'success');
+                    loadForumPosts();
+                } else {
+                    showToast('Failed to create post', 'error');
+                }
+            } catch (error) {
+                showToast('Error creating post', 'error');
+            }
+        }
+
+        function logout() {
+            token = '';
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            showToast('Logged out', 'success');
+        }
+    </script>
+</body>
+</html>
