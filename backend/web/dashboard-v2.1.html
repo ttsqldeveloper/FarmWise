@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FarmWise AI v2.1 | Contextual Farming Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a2e1f 0%, #1a4731 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(72, 187, 120, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-10%, -10%); }
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Glass Morphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, rgba(26, 71, 49, 0.95), rgba(15, 46, 32, 0.95));
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 24px 32px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #48bb78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .version-badge {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 10px;
+            color: white;
+        }
+
+        .feature-tags {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .feature-tag {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Login Section */
+        .login-container {
+            max-width: 480px;
+            margin: 80px auto;
+        }
+
+        .login-card {
+            padding: 48px;
+            text-align: center;
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(72, 187, 120, 0.4);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1a4731;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: #48bb78;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+            color: #2d3748;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .chat-input button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.02);
+        }
+
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 40px;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: #48bb78;
+            color: white;
+        }
+
+        /* Reminders */
+        .reminder-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .reminder-form input, .reminder-form select {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .reminder-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+            transition: all 0.2s;
+        }
+
+        .reminder-item:hover {
+            transform: translateX(4px);
+        }
+
+        .priority-high { border-left-color: #f56565; }
+        .priority-medium { border-left-color: #ed8936; }
+        .priority-low { border-left-color: #48bb78; }
+
+        /* Advice Items */
+        .advice-item {
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #48bb78;
+            transition: all 0.2s;
+        }
+
+        .advice-item:hover {
+            transform: translateX(4px);
+            background: white;
+        }
+
+        /* Disease Detection */
+        .disease-upload {
+            text-align: center;
+            padding: 40px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .disease-upload:hover {
+            border-color: #48bb78;
+            background: #f7fafc;
+        }
+
+        /* Context Badge */
+        .context-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        /* Buttons */
+        .btn-sm {
+            padding: 8px 16px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .logout-btn {
+            background: #f56565;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 14px 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #48bb78;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .reminder-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🌱 FarmWise AI <span class="version-badge">v2.1</span></h1>
+                    <p style="font-size: 0.8rem; opacity: 0.8; margin-top: 5px;">Contextual Intelligent Farming Assistant</p>
+                </div>
+                <div class="feature-tags">
+                    <span class="feature-tag"><i class="fas fa-brain"></i> Contextual AI</span>
+                    <span class="feature-tag"><i class="fas fa-globe"></i> Multi-Language</span>
+                    <span class="feature-tag"><i class="fas fa-camera"></i> Disease Detection</span>
+                    <span class="feature-tag"><i class="fas fa-chart-line"></i> Analytics</span>
+                </div>
+                <div class="language-selector" id="languageSelector">
+                    <button class="lang-btn active" onclick="changeLanguage('en')">🇬🇧 EN</button>
+                    <button class="lang-btn" onclick="changeLanguage('sw')">🇹🇿 SW</button>
+                    <button class="lang-btn" onclick="changeLanguage('es')">🇪🇸 ES</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-container">
+            <div class="glass-card login-card">
+                <div class="login-icon">🤖</div>
+                <h2 style="margin-bottom: 8px;">FarmWise AI Assistant</h2>
+                <p style="color: #718096; margin-bottom: 32px;">Contextual Intelligence | Real-time Advice | Disease Detection</p>
+                <div class="input-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="loginEmail" placeholder="demo@farmwise.com" value="demo@farmwise.com">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" value="password123">
+                </div>
+                <button class="btn-primary" onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Login to AI Assistant
+                </button>
+                <p style="margin-top: 24px; font-size: 0.75rem; color: #a0aec0;">
+                    <i class="fas fa-flask"></i> Demo: demo@farmwise.com / password123
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">🌾</div>
+                    <div class="stat-value" id="statYield">0</div>
+                    <div class="stat-label" id="labelYield">Total Yield (kg)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" id="statRevenue">0</div>
+                    <div class="stat-label" id="labelRevenue">Revenue ($)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value" id="statProfit">0</div>
+                    <div class="stat-label" id="labelProfit">Profit ($)</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="statHealth">85%</div>
+                    <div class="stat-label" id="labelHealth">Farm Health Score</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- AI Chatbot -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-robot"></i> <span id="titleChat">AI Assistant</span></h2>
+                        <button class="btn-sm" onclick="clearChat()"><i class="fas fa-trash-alt"></i> Clear</button>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="message-bubble">
+                                    🤖 <strong>FarmWise AI v2.1</strong><br><br>
+                                    I'm your contextual farming assistant! I remember our conversation and can help with:<br><br>
+                                    🌾 <strong>Crops:</strong> Planting, watering, fertilizing, pest control, diseases<br>
+                                    🐄 <strong>Livestock:</strong> Feeding, vaccination, health signs, housing<br>
+                                    🌍 <strong>Seasonal:</strong> Dry season prep, rainy season management<br>
+                                    📸 <strong>Disease Detection:</strong> Upload plant photos for AI diagnosis<br><br>
+                                    💡 <strong>Try asking:</strong> "How to treat tomato blight?" then "What about watering?"
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Ask about farming..." onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
+                        </div>
+                    </div>
+                    <div id="contextIndicator" class="context-badge" style="display: none;">
+                        <i class="fas fa-brain"></i> Context: Remembering previous conversation
+                    </div>
+                </div>
+
+                <!-- Smart Advice -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-lightbulb"></i> <span id="titleAdvice">Smart Advice</span></h2>
+                        <button class="btn-sm" onclick="loadAdvice()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                    <div id="adviceContent">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <!-- Disease Detection -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-camera"></i> <span id="titleDisease">Disease Detection</span></h2>
+                    </div>
+                    <div class="disease-upload" onclick="document.getElementById('diseaseImage').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #48bb78;"></i>
+                        <p style="margin-top: 12px;"><strong>Upload a photo of your plant</strong></p>
+                        <p style="font-size: 0.7rem; color: #a0aec0;">AI-powered diagnosis for crop diseases</p>
+                        <input type="file" id="diseaseImage" accept="image/*" style="display: none;" onchange="detectDisease(this.files[0])">
+                    </div>
+                    <div id="diseaseResult"></div>
+                </div>
+
+                <!-- Smart Reminders -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bell"></i> <span id="titleReminders">Smart Reminders</span></h2>
+                    </div>
+                    <div class="reminder-form">
+                        <input type="text" id="reminderTitle" placeholder="What needs to be done?">
+                        <input type="date" id="reminderDate">
+                        <select id="reminderPriority">
+                            <option value="high">🔴 High Priority</option>
+                            <option value="medium" selected>🟡 Medium Priority</option>
+                            <option value="low">🟢 Low Priority</option>
+                        </select>
+                        <button class="btn-sm" onclick="createReminder()"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <div id="reminderList">
+                        <p style="text-align: center; color: #a0aec0; padding: 20px;">No reminders yet. Create one above!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div style="text-align: center; margin: 40px 0 20px;">
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span id="btnLogout">Logout</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        let currentLang = 'en';
+        let conversationContext = [];
+        const API_URL = '';
+
+        // Translations
+        const translations = {
+            en: {
+                yield: 'Total Yield (kg)', revenue: 'Revenue ($)', profit: 'Profit ($)', health: 'Farm Health Score',
+                titleChat: 'AI Assistant', titleAdvice: 'Smart Advice', titleDisease: 'Disease Detection', titleReminders: 'Smart Reminders', logout: 'Logout'
+            },
+            sw: {
+                yield: 'Mavuno Jumla (kg)', revenue: 'Mapato ($)', profit: 'Faida ($)', health: 'Alama ya Afya',
+                titleChat: 'Msaidizi wa AI', titleAdvice: 'Ushauri', titleDisease: 'Kugundua Magonjwa', titleReminders: 'Vikumbusho', logout: 'Toka'
+            },
+            es: {
+                yield: 'Rendimiento (kg)', revenue: 'Ingresos ($)', profit: 'Ganancia ($)', health: 'Salud de Granja',
+                titleChat: 'Asistente AI', titleAdvice: 'Consejos', titleDisease: 'Detección', titleReminders: 'Recordatorios', logout: 'Cerrar Sesión'
+            }
+        };
+
+        function updateUI() {
+            const t = translations[currentLang];
+            document.getElementById('labelYield').innerText = t.yield;
+            document.getElementById('labelRevenue').innerText = t.revenue;
+            document.getElementById('labelProfit').innerText = t.profit;
+            document.getElementById('labelHealth').innerText = t.health;
+            document.getElementById('titleChat').innerText = t.titleChat;
+            document.getElementById('titleAdvice').innerText = t.titleAdvice;
+            document.getElementById('titleDisease').innerText = t.titleDisease;
+            document.getElementById('titleReminders').innerText = t.titleReminders;
+            document.getElementById('btnLogout').innerText = t.logout;
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            updateUI();
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            showToast(`Language changed to ${lang.toUpperCase()}`, 'success');
+        }
+
+        function showToast(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="color: ${type === 'success' ? '#48bb78' : '#f56565'}"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    showToast('Welcome to FarmWise AI v2.1!', 'success');
+                    loadAllData();
+                } else {
+                    showToast(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showToast('Connection error. Make sure server is running on port 3001', 'error');
+            }
+        }
+
+        async function loadAllData() {
+            await loadAdvice();
+            await loadReminders();
+            await loadStats();
+        }
+
+        async function loadAdvice() {
+            try {
+                const res = await fetch('/api/advice/personalized', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.advice && data.advice.length > 0) {
+                    document.getElementById('adviceContent').innerHTML = data.advice.map(a => `
+                        <div class="advice-item">
+                            <div class="advice-title">${a.title}</div>
+                            <div>${a.content}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('adviceContent').innerHTML = `
+                        <div class="advice-item">
+                            <div class="advice-title">🌱 Welcome to FarmWise!</div>
+                            <div>Start a conversation with the AI assistant to get personalized advice.</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('adviceContent').innerHTML = `
+                    <div class="advice-item">
+                        <div class="advice-title">💡 Quick Tip</div>
+                        <div>Ask the AI about crop diseases, watering schedules, or livestock care!</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatDiv = document.getElementById('chatMessages');
+            chatDiv.innerHTML += `
+                <div class="message user">
+                    <div class="message-bubble">${escapeHtml(message)}</div>
+                </div>
+            `;
+            input.value = '';
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // Show typing indicator
+            chatDiv.innerHTML += `
+                <div class="message bot" id="typingIndicator">
+                    <div class="message-bubble"><i class="fas fa-brain"></i> Thinking... <span class="spinner" style="width: 16px; height: 16px; display: inline-block;"></span></div>
+                </div>
+            `;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            try {
+                const res = await fetch('/api/chatbot/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: message })
+                });
+                const data = await res.json();
+
+                // Remove typing indicator
+                document.getElementById('typingIndicator')?.remove();
+
+                // Store context
+                conversationContext.push({ question: message, answer: data.answer });
+                if (conversationContext.length > 5) conversationContext.shift();
+
+                // Show context indicator
+                if (conversationContext.length > 1) {
+                    document.getElementById('contextIndicator').style.display = 'inline-flex';
+                }
+
+                chatDiv.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-bubble">${escapeHtml(data.answer).replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            } catch (error) {
+                document.getElementById('typingIndicator')?.remove();
+                chatDiv.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-bubble">❌ Sorry, I'm having trouble connecting. Please check your server connection.</div>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadReminders() {
+            try {
+                const res = await fetch('/api/reminders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.reminders && data.reminders.length > 0) {
+                    document.getElementById('reminderList').innerHTML = data.reminders.map(r => `
+                        <div class="reminder-item priority-${r.priority}">
+                            <div class="reminder-content">
+                                <div class="reminder-title">${escapeHtml(r.title)}</div>
+                                <div class="reminder-date">${r.due_date || 'No date set'} • ${r.priority} priority</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('reminderList').innerHTML = '<p style="text-align: center; color: #a0aec0; padding: 20px;">No reminders yet. Create one above!</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load reminders');
+            }
+        }
+
+        async function createReminder() {
+            const title = document.getElementById('reminderTitle').value;
+            if (!title) {
+                showToast('Please enter a reminder title', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/reminders', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        due_date: document.getElementById('reminderDate').value,
+                        priority: document.getElementById('reminderPriority').value
+                    })
+                });
+
+                if (res.ok) {
+                    document.getElementById('reminderTitle').value = '';
+                    document.getElementById('reminderDate').value = '';
+                    await loadReminders();
+                    showToast('Reminder created!', 'success');
+                }
+            } catch (error) {
+                showToast('Failed to create reminder', 'error');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/farm/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.stats) {
+                    document.getElementById('statYield').innerText = data.stats.yield || '0';
+                    document.getElementById('statRevenue').innerText = data.stats.revenue || '0';
+                    document.getElementById('statProfit').innerText = data.stats.profit || '0';
+                    document.getElementById('statHealth').innerText = (data.stats.health_score || '85') + '%';
+                }
+            } catch (error) {
+                // Use default values
+                document.getElementById('statYield').innerText = '0';
+                document.getElementById('statRevenue').innerText = '0';
+                document.getElementById('statProfit').innerText = '0';
+            }
+        }
+
+        async function detectDisease(file) {
+            if (!file) return;
+
+            const resultDiv = document.getElementById('diseaseResult');
+            resultDiv.innerHTML = '<div class="spinner"></div><p style="text-align: center;">Analyzing image...</p>';
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/api/detect-disease', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.detection) {
+                    resultDiv.innerHTML = `
+                        <div class="advice-item" style="border-left-color: ${data.detection.severity === 'high' ? '#f56565' : '#48bb78'}; margin-top: 15px;">
+                            <div class="advice-title">🔬 Analysis Complete</div>
+                            <div><strong>Disease:</strong> ${data.detection.name}</div>
+                            <div><strong>Confidence:</strong> ${Math.round(data.detection.confidence * 100)}%</div>
+                            <div><strong>Symptoms:</strong> ${data.detection.symptoms}</div>
+                            ${data.treatment ? `
+                                <div style="margin-top: 10px;"><strong>Recommended Treatment:</strong></div>
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    ${data.treatment.steps?.map(step => `<li>${step}</li>`).join('') || `<li>${data.treatment.title}</li>`}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    `;
+                    showToast('Disease analysis complete!', 'success');
+                } else {
+                    resultDiv.innerHTML = '<p style="color: #f56565; text-align: center;">Detection failed. Please try again with a clearer image.</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p style="color: #f56565; text-align: center;">Error analyzing image. Please try again.</p>';
+            }
+        }
+
+        function clearChat() {
+            const chatDiv = document.getElementById('chatMessages');
+            chatDiv.innerHTML = `
+                <div class="message bot">
+                    <div class="message-bubble">✨ Chat cleared. How can I help you with your farm today?</div>
+                </div>
+            `;
+            conversationContext = [];
+            document.getElementById('contextIndicator').style.display = 'none';
+            showToast('Chat history cleared', 'success');
+        }
+
+        function logout() {
+            token = '';
+            conversationContext = [];
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+            showToast('Logged out successfully', 'success');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>
