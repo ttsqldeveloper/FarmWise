@@ -1,6 +1,6 @@
 // ============================================
 // FARMWISE PRODUCTION SERVER v2.1
-// Complete Production-Ready API
+// Complete Production-Ready API with Registration
 // ============================================
 
 const express = require('express');
@@ -58,8 +58,11 @@ async function createDemoUser() {
             region: 'tropical',
             farm_type: 'crops',
             crop_type: 'maize',
+            livestock_type: null,
             language: 'en',
-            experience_level: 'beginner'
+            experience_level: 'beginner',
+            farm_size: 5,
+            created_at: new Date().toISOString()
         });
         console.log('✅ Demo user created: demo@farmwise.com / password123');
     } else {
@@ -95,46 +98,109 @@ app.get('/api/health', (req, res) => {
         version: '2.1.0',
         message: 'FarmWise API is running!',
         timestamp: new Date().toISOString(),
-        features: ['ai-chatbot', 'multi-language', 'analytics', 'community', 'disease-detection']
+        features: ['ai-chatbot', 'multi-language', 'analytics', 'community', 'disease-detection', 'user-registration']
     });
 });
 
 // ============================================
-// AUTHENTICATION ENDPOINTS - FIXED
+// REGISTRATION ENDPOINT - FULLY IMPLEMENTED
 // ============================================
 app.post('/api/auth/register', async (req, res) => {
-    const { email, password, name, region, farm_type, crop_type, livestock_type, language } = req.body;
+    const { 
+        email, 
+        password, 
+        name, 
+        region, 
+        farm_type, 
+        crop_type, 
+        livestock_type, 
+        language,
+        farm_size,
+        experience_level
+    } = req.body;
     
-    if (!email || !password || !name || !region || !farm_type) {
-        return res.status(400).json({ error: 'Missing required fields' });
+    // Validate required fields
+    const missingFields = [];
+    if (!email) missingFields.push('email');
+    if (!password) missingFields.push('password');
+    if (!name) missingFields.push('name');
+    if (!region) missingFields.push('region');
+    if (!farm_type) missingFields.push('farm_type');
+    
+    if (missingFields.length > 0) {
+        return res.status(400).json({ 
+            error: 'Missing required fields', 
+            missing: missingFields 
+        });
     }
     
-    if (users.find(u => u.email === email)) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
+    // Validate password strength
+    if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    
+    // Check if user already exists
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
         return res.status(400).json({ error: 'User already exists' });
     }
     
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-        id: users.length + 1,
-        email,
-        password: hashedPassword,
-        name,
-        region,
-        farm_type,
-        crop_type: crop_type || null,
-        livestock_type: livestock_type || null,
-        language: language || 'en',
-        experience_level: 'beginner'
-    };
-    
-    users.push(newUser);
-    const token = jwt.sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
-    const { password: _, ...userWithoutPassword } = newUser;
-    
-    res.status(201).json({ user: userWithoutPassword, token });
+    try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Create new user
+        const newUser = {
+            id: users.length + 1,
+            email,
+            password: hashedPassword,
+            name,
+            region,
+            farm_type,
+            crop_type: crop_type || null,
+            livestock_type: livestock_type || null,
+            language: language || 'en',
+            experience_level: experience_level || 'beginner',
+            farm_size: farm_size || 1,
+            created_at: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: newUser.id, email: newUser.email }, 
+            JWT_SECRET, 
+            { expiresIn: '7d' }
+        );
+        
+        // Return user without password
+        const { password: _, ...userWithoutPassword } = newUser;
+        
+        console.log(`✅ New user registered: ${email}`);
+        
+        res.status(201).json({ 
+            success: true,
+            message: 'Registration successful!',
+            user: userWithoutPassword, 
+            token 
+        });
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Server error during registration' });
+    }
 });
 
-// LOGIN ENDPOINT - FIXED
+// ============================================
+// LOGIN ENDPOINT
+// ============================================
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     
@@ -169,11 +235,29 @@ app.post('/api/auth/login', async (req, res) => {
     const { password: _, ...userWithoutPassword } = user;
     
     console.log(`✅ Login successful: ${email}`);
-    res.json({ user: userWithoutPassword, token });
+    res.json({ 
+        success: true,
+        message: 'Login successful!',
+        user: userWithoutPassword, 
+        token 
+    });
 });
 
 // ============================================
-// FARM PROFILE ENDPOINTS
+// GET ALL USERS (Admin endpoint - for testing)
+// ============================================
+app.get('/api/users', auth, (req, res) => {
+    // Only return users list for admin (user id 1 is demo admin)
+    if (req.user.userId !== 1) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+    res.json({ users: usersWithoutPasswords, count: users.length });
+});
+
+// ============================================
+// GET CURRENT USER PROFILE
 // ============================================
 app.get('/api/farm/profile', auth, (req, res) => {
     const user = users.find(u => u.id == req.user.userId);
@@ -184,6 +268,36 @@ app.get('/api/farm/profile', auth, (req, res) => {
     res.json({ profile });
 });
 
+// ============================================
+// UPDATE USER PROFILE
+// ============================================
+app.put('/api/farm/profile', auth, async (req, res) => {
+    const { name, region, farm_type, crop_type, livestock_type, language, experience_level, farm_size } = req.body;
+    const userIndex = users.findIndex(u => u.id == req.user.userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Update user fields
+    if (name) users[userIndex].name = name;
+    if (region) users[userIndex].region = region;
+    if (farm_type) users[userIndex].farm_type = farm_type;
+    if (crop_type) users[userIndex].crop_type = crop_type;
+    if (livestock_type) users[userIndex].livestock_type = livestock_type;
+    if (language) users[userIndex].language = language;
+    if (experience_level) users[userIndex].experience_level = experience_level;
+    if (farm_size) users[userIndex].farm_size = farm_size;
+    
+    users[userIndex].updated_at = new Date().toISOString();
+    
+    const { password, ...profile } = users[userIndex];
+    res.json({ success: true, profile });
+});
+
+// ============================================
+// GET FARM STATS
+// ============================================
 app.get('/api/farm/stats', auth, (req, res) => {
     const userReminders = reminders.filter(r => r.user_id == req.user.userId);
     const userChats = chatHistory.filter(c => c.user_id == req.user.userId);
@@ -566,7 +680,7 @@ app.post('/api/market/prices', auth, (req, res) => {
 });
 
 // ============================================
-// WEATHER API ENDPOINT (Mock for Production)
+// WEATHER API ENDPOINT
 // ============================================
 app.get('/api/weather', auth, (req, res) => {
     res.json({
@@ -624,6 +738,7 @@ createDemoUser().then(() => {
         console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
         console.log(`💚 Health: http://localhost:${PORT}/api/health`);
         console.log(`\n✨ FEATURES:`);
+        console.log(`   🔐 User Registration & Login`);
         console.log(`   🤖 Contextual AI Chatbot`);
         console.log(`   🌍 Multi-Language Support`);
         console.log(`   📸 Disease Detection`);
@@ -634,6 +749,8 @@ createDemoUser().then(() => {
         console.log(`\n📝 Demo Account:`);
         console.log(`   Email: demo@farmwise.com`);
         console.log(`   Password: password123`);
+        console.log(`\n📝 To register a new account:`);
+        console.log(`   POST /api/auth/register with email, password, name, region, farm_type`);
         console.log(`\n✅ Server is ready! Press Ctrl+C to stop.\n`);
     });
 });
