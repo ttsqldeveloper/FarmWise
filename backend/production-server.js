@@ -35,27 +35,37 @@ const upload = multer({
 
 // ============================================
 // DATABASE (In-Memory for Production Demo)
-// Note: Replace with PostgreSQL for production
 // ============================================
-let users = [
-    {
-        id: 1,
-        email: 'demo@farmwise.com',
-        password: '$2a$10$YourHashedPasswordHere', // In production, use bcrypt
-        name: 'Demo Farmer',
-        region: 'tropical',
-        farm_type: 'crops',
-        crop_type: 'maize',
-        language: 'en',
-        experience_level: 'beginner'
-    }
-];
-
+let users = [];
 let reminders = [];
 let chatHistory = [];
 let farmLogs = [];
 let forumPosts = [];
 let marketPrices = [];
+
+// ============================================
+// HELPER: Create Demo User on Startup
+// ============================================
+async function createDemoUser() {
+    const demoExists = users.find(u => u.email === 'demo@farmwise.com');
+    if (!demoExists) {
+        const hashedPassword = await bcrypt.hash('password123', 10);
+        users.push({
+            id: 1,
+            email: 'demo@farmwise.com',
+            password: hashedPassword,
+            name: 'Demo Farmer',
+            region: 'tropical',
+            farm_type: 'crops',
+            crop_type: 'maize',
+            language: 'en',
+            experience_level: 'beginner'
+        });
+        console.log('✅ Demo user created: demo@farmwise.com / password123');
+    } else {
+        console.log('✅ Demo user already exists');
+    }
+}
 
 // ============================================
 // AUTHENTICATION MIDDLEWARE
@@ -90,7 +100,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
-// AUTHENTICATION ENDPOINTS
+// AUTHENTICATION ENDPOINTS - FIXED
 // ============================================
 app.post('/api/auth/register', async (req, res) => {
     const { email, password, name, region, farm_type, crop_type, livestock_type, language } = req.body;
@@ -124,22 +134,41 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(201).json({ user: userWithoutPassword, token });
 });
 
+// LOGIN ENDPOINT - FIXED
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
+    
+    console.log(`🔐 Login attempt: ${email}`);
+    
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password required' });
+    }
+    
     const user = users.find(u => u.email === email);
     
     if (!user) {
+        console.log(`❌ User not found: ${email}`);
         return res.status(401).json({ error: 'Invalid credentials' });
     }
     
+    // Verify password using bcrypt
     const validPassword = await bcrypt.compare(password, user.password);
+    
     if (!validPassword) {
+        console.log(`❌ Invalid password for: ${email}`);
         return res.status(401).json({ error: 'Invalid credentials' });
     }
     
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    // Generate JWT token
+    const token = jwt.sign(
+        { userId: user.id, email: user.email }, 
+        JWT_SECRET, 
+        { expiresIn: '7d' }
+    );
+    
     const { password: _, ...userWithoutPassword } = user;
     
+    console.log(`✅ Login successful: ${email}`);
     res.json({ user: userWithoutPassword, token });
 });
 
@@ -584,24 +613,27 @@ app.use((err, req, res, next) => {
 // ============================================
 // START SERVER
 // ============================================
-app.listen(PORT, () => {
-    console.log('\n╔══════════════════════════════════════════════════════════════╗');
-    console.log('║     🚀 FARMWISE PRODUCTION SERVER v2.1 🚀                    ║');
-    console.log('║     Complete Intelligent Farming Platform                    ║');
-    console.log('╚══════════════════════════════════════════════════════════════╝');
-    console.log(`\n📡 Server: http://localhost:${PORT}`);
-    console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
-    console.log(`💚 Health: http://localhost:${PORT}/api/health`);
-    console.log(`\n✨ FEATURES:`);
-    console.log(`   🤖 Contextual AI Chatbot`);
-    console.log(`   🌍 Multi-Language Support`);
-    console.log(`   📸 Disease Detection`);
-    console.log(`   📊 Farm Analytics`);
-    console.log(`   🤝 Community Forum`);
-    console.log(`   💰 Market Prices`);
-    console.log(`   ⏰ Smart Reminders`);
-    console.log(`\n📝 Demo Account:`);
-    console.log(`   Email: demo@farmwise.com`);
-    console.log(`   Password: password123`);
-    console.log(`\n✅ Server is ready! Press Ctrl+C to stop.\n`);
+// Create demo user before starting server
+createDemoUser().then(() => {
+    app.listen(PORT, () => {
+        console.log('\n╔══════════════════════════════════════════════════════════════╗');
+        console.log('║     🚀 FARMWISE PRODUCTION SERVER v2.1 🚀                    ║');
+        console.log('║     Complete Intelligent Farming Platform                    ║');
+        console.log('╚══════════════════════════════════════════════════════════════╝');
+        console.log(`\n📡 Server: http://localhost:${PORT}`);
+        console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
+        console.log(`💚 Health: http://localhost:${PORT}/api/health`);
+        console.log(`\n✨ FEATURES:`);
+        console.log(`   🤖 Contextual AI Chatbot`);
+        console.log(`   🌍 Multi-Language Support`);
+        console.log(`   📸 Disease Detection`);
+        console.log(`   📊 Farm Analytics`);
+        console.log(`   🤝 Community Forum`);
+        console.log(`   💰 Market Prices`);
+        console.log(`   ⏰ Smart Reminders`);
+        console.log(`\n📝 Demo Account:`);
+        console.log(`   Email: demo@farmwise.com`);
+        console.log(`   Password: password123`);
+        console.log(`\n✅ Server is ready! Press Ctrl+C to stop.\n`);
+    });
 });
