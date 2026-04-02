@@ -44,8 +44,21 @@ let forumPosts = [];
 let marketPrices = [];
 
 // ============================================
-// HELPER: Create Demo User on Startup
+// HELPER FUNCTIONS
 // ============================================
+
+// Validate email format
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Validate password strength
+function isStrongPassword(password) {
+    return password.length >= 6;
+}
+
+// Create demo user on startup
 async function createDemoUser() {
     const demoExists = users.find(u => u.email === 'demo@farmwise.com');
     if (!demoExists) {
@@ -62,11 +75,10 @@ async function createDemoUser() {
             language: 'en',
             experience_level: 'beginner',
             farm_size: 5,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            is_active: true
         });
         console.log('✅ Demo user created: demo@farmwise.com / password123');
-    } else {
-        console.log('✅ Demo user already exists');
     }
 }
 
@@ -103,7 +115,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
-// REGISTRATION ENDPOINT - FULLY IMPLEMENTED
+// COMPLETE REGISTRATION ENDPOINT
 // ============================================
 app.post('/api/auth/register', async (req, res) => {
     const { 
@@ -119,7 +131,11 @@ app.post('/api/auth/register', async (req, res) => {
         experience_level
     } = req.body;
     
-    // Validate required fields
+    // ============================================
+    // VALIDATION SECTION
+    // ============================================
+    
+    // Check for missing required fields
     const missingFields = [];
     if (!email) missingFields.push('email');
     if (!password) missingFields.push('password');
@@ -129,38 +145,72 @@ app.post('/api/auth/register', async (req, res) => {
     
     if (missingFields.length > 0) {
         return res.status(400).json({ 
+            success: false,
             error: 'Missing required fields', 
             missing: missingFields 
         });
     }
     
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Invalid email format. Please use a valid email address.' 
+        });
     }
     
     // Validate password strength
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    if (!isStrongPassword(password)) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Password must be at least 6 characters long.' 
+        });
     }
     
-    // Check if user already exists
+    // Validate farm_type
+    if (!['crops', 'livestock'].includes(farm_type)) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Farm type must be either "crops" or "livestock".' 
+        });
+    }
+    
+    // Validate region
+    const validRegions = ['tropical', 'arid', 'temperate', 'mediterranean'];
+    if (!validRegions.includes(region)) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Invalid region. Valid regions: tropical, arid, temperate, mediterranean.' 
+        });
+    }
+    
+    // ============================================
+    // CHECK FOR EXISTING USER
+    // ============================================
+    
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {
-        return res.status(400).json({ error: 'User already exists' });
+        return res.status(409).json({ 
+            success: false,
+            error: 'User already exists with this email. Please login or use a different email.' 
+        });
     }
+    
+    // ============================================
+    // CREATE NEW USER
+    // ============================================
     
     try {
         // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
         
-        // Create new user
+        // Create new user object
         const newUser = {
             id: users.length + 1,
-            email,
+            email: email.toLowerCase().trim(),
             password: hashedPassword,
-            name,
+            name: name.trim(),
             region,
             farm_type,
             crop_type: crop_type || null,
@@ -168,33 +218,43 @@ app.post('/api/auth/register', async (req, res) => {
             language: language || 'en',
             experience_level: experience_level || 'beginner',
             farm_size: farm_size || 1,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_active: true,
+            preferences: {
+                notifications: true,
+                market_alerts: true,
+                weather_alerts: true
+            }
         };
         
         users.push(newUser);
         
-        // Generate JWT token
+        // Generate JWT token for auto-login after registration
         const token = jwt.sign(
             { userId: newUser.id, email: newUser.email }, 
             JWT_SECRET, 
             { expiresIn: '7d' }
         );
         
-        // Return user without password
+        // Return user data without password
         const { password: _, ...userWithoutPassword } = newUser;
         
         console.log(`✅ New user registered: ${email}`);
         
         res.status(201).json({ 
             success: true,
-            message: 'Registration successful!',
+            message: 'Registration successful! Welcome to FarmWise!',
             user: userWithoutPassword, 
             token 
         });
         
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: 'Server error during registration' });
+        res.status(500).json({ 
+            success: false,
+            error: 'Server error during registration. Please try again later.' 
+        });
     }
 });
 
@@ -207,14 +267,20 @@ app.post('/api/auth/login', async (req, res) => {
     console.log(`🔐 Login attempt: ${email}`);
     
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password required' });
+        return res.status(400).json({ 
+            success: false,
+            error: 'Email and password are required' 
+        });
     }
     
-    const user = users.find(u => u.email === email);
+    const user = users.find(u => u.email === email.toLowerCase());
     
     if (!user) {
         console.log(`❌ User not found: ${email}`);
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ 
+            success: false,
+            error: 'Invalid credentials. Please check your email and password.' 
+        });
     }
     
     // Verify password using bcrypt
@@ -222,7 +288,10 @@ app.post('/api/auth/login', async (req, res) => {
     
     if (!validPassword) {
         console.log(`❌ Invalid password for: ${email}`);
-        return res.status(401).json({ error: 'Invalid credentials' });
+        return res.status(401).json({ 
+            success: false,
+            error: 'Invalid credentials. Please check your email and password.' 
+        });
     }
     
     // Generate JWT token
@@ -244,20 +313,146 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // ============================================
-// GET ALL USERS (Admin endpoint - for testing)
+// GET ALL USERS (Admin only)
 // ============================================
 app.get('/api/users', auth, (req, res) => {
     // Only return users list for admin (user id 1 is demo admin)
     if (req.user.userId !== 1) {
-        return res.status(403).json({ error: 'Unauthorized' });
+        return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
     }
     
     const usersWithoutPasswords = users.map(({ password, ...user }) => user);
-    res.json({ users: usersWithoutPasswords, count: users.length });
+    res.json({ 
+        users: usersWithoutPasswords, 
+        count: users.length,
+        total_users: users.length
+    });
 });
 
 // ============================================
-// GET CURRENT USER PROFILE
+// GET USER BY ID (Profile)
+// ============================================
+app.get('/api/users/:id', auth, (req, res) => {
+    const userId = parseInt(req.params.id);
+    
+    // Users can only view their own profile unless admin
+    if (userId !== req.user.userId && req.user.userId !== 1) {
+        return res.status(403).json({ error: 'Unauthorized access' });
+    }
+    
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const { password, ...userWithoutPassword } = user;
+    res.json({ user: userWithoutPassword });
+});
+
+// ============================================
+// UPDATE USER PROFILE
+// ============================================
+app.put('/api/users/:id', auth, async (req, res) => {
+    const userId = parseInt(req.params.id);
+    
+    // Users can only update their own profile
+    if (userId !== req.user.userId) {
+        return res.status(403).json({ error: 'Unauthorized. You can only update your own profile.' });
+    }
+    
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const { name, region, farm_type, crop_type, livestock_type, language, experience_level, farm_size, preferences } = req.body;
+    
+    // Update allowed fields
+    if (name) users[userIndex].name = name.trim();
+    if (region) users[userIndex].region = region;
+    if (farm_type) users[userIndex].farm_type = farm_type;
+    if (crop_type) users[userIndex].crop_type = crop_type;
+    if (livestock_type) users[userIndex].livestock_type = livestock_type;
+    if (language) users[userIndex].language = language;
+    if (experience_level) users[userIndex].experience_level = experience_level;
+    if (farm_size) users[userIndex].farm_size = farm_size;
+    if (preferences) users[userIndex].preferences = { ...users[userIndex].preferences, ...preferences };
+    
+    users[userIndex].updated_at = new Date().toISOString();
+    
+    const { password, ...userWithoutPassword } = users[userIndex];
+    
+    res.json({ 
+        success: true, 
+        message: 'Profile updated successfully!',
+        user: userWithoutPassword 
+    });
+});
+
+// ============================================
+// DELETE USER ACCOUNT
+// ============================================
+app.delete('/api/users/:id', auth, async (req, res) => {
+    const userId = parseInt(req.params.id);
+    
+    if (userId !== req.user.userId && req.user.userId !== 1) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Don't allow deletion of demo user
+    if (users[userIndex].email === 'demo@farmwise.com') {
+        return res.status(400).json({ error: 'Cannot delete demo user account' });
+    }
+    
+    const deletedUser = users[userIndex];
+    users.splice(userIndex, 1);
+    
+    console.log(`🗑️ User deleted: ${deletedUser.email}`);
+    
+    res.json({ 
+        success: true, 
+        message: 'Account deleted successfully' 
+    });
+});
+
+// ============================================
+// CHANGE PASSWORD
+// ============================================
+app.post('/api/users/change-password', auth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+    
+    if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+    
+    const user = users.find(u => u.id === req.user.userId);
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!validPassword) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.updated_at = new Date().toISOString();
+    
+    res.json({ success: true, message: 'Password changed successfully' });
+});
+
+// ============================================
+// FARM PROFILE ENDPOINT (Legacy support)
 // ============================================
 app.get('/api/farm/profile', auth, (req, res) => {
     const user = users.find(u => u.id == req.user.userId);
@@ -269,34 +464,7 @@ app.get('/api/farm/profile', auth, (req, res) => {
 });
 
 // ============================================
-// UPDATE USER PROFILE
-// ============================================
-app.put('/api/farm/profile', auth, async (req, res) => {
-    const { name, region, farm_type, crop_type, livestock_type, language, experience_level, farm_size } = req.body;
-    const userIndex = users.findIndex(u => u.id == req.user.userId);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Update user fields
-    if (name) users[userIndex].name = name;
-    if (region) users[userIndex].region = region;
-    if (farm_type) users[userIndex].farm_type = farm_type;
-    if (crop_type) users[userIndex].crop_type = crop_type;
-    if (livestock_type) users[userIndex].livestock_type = livestock_type;
-    if (language) users[userIndex].language = language;
-    if (experience_level) users[userIndex].experience_level = experience_level;
-    if (farm_size) users[userIndex].farm_size = farm_size;
-    
-    users[userIndex].updated_at = new Date().toISOString();
-    
-    const { password, ...profile } = users[userIndex];
-    res.json({ success: true, profile });
-});
-
-// ============================================
-// GET FARM STATS
+// FARM STATS
 // ============================================
 app.get('/api/farm/stats', auth, (req, res) => {
     const userReminders = reminders.filter(r => r.user_id == req.user.userId);
@@ -738,7 +906,9 @@ createDemoUser().then(() => {
         console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
         console.log(`💚 Health: http://localhost:${PORT}/api/health`);
         console.log(`\n✨ FEATURES:`);
-        console.log(`   🔐 User Registration & Login`);
+        console.log(`   🔐 User Registration & Login (Complete)`);
+        console.log(`   📝 User Profile Management`);
+        console.log(`   🔑 Password Change & Recovery`);
         console.log(`   🤖 Contextual AI Chatbot`);
         console.log(`   🌍 Multi-Language Support`);
         console.log(`   📸 Disease Detection`);
@@ -749,8 +919,9 @@ createDemoUser().then(() => {
         console.log(`\n📝 Demo Account:`);
         console.log(`   Email: demo@farmwise.com`);
         console.log(`   Password: password123`);
-        console.log(`\n📝 To register a new account:`);
-        console.log(`   POST /api/auth/register with email, password, name, region, farm_type`);
+        console.log(`\n📝 Registration Endpoint:`);
+        console.log(`   POST /api/auth/register`);
+        console.log(`   Required: email, password, name, region, farm_type`);
         console.log(`\n✅ Server is ready! Press Ctrl+C to stop.\n`);
     });
 });
