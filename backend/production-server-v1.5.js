@@ -435,7 +435,8 @@ app.get('/dashboard', (req, res) => {
 // ERROR HANDLING
 // ============================================
 app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
+    console.log(`❌ 404: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `Endpoint not found: ${req.method} ${req.url}` });
 });
 
 app.use((err, req, res, next) => {
