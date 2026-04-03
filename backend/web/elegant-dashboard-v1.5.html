@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FarmWise v1.5 | Intelligent Farming Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            color: #1a202c;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ba6b5;
+        }
+
+        /* Container */
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Glass Morphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a4731 0%, #0f2e20 100%);
+            border-radius: 32px;
+            padding: 32px 40px;
+            margin-bottom: 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.05)" d="M20,20 L30,20 L25,30 Z M70,70 L80,70 L75,80 Z M40,80 L50,80 L45,90 Z"/></svg>') repeat;
+            opacity: 0.1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logo .version {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+
+        .server-status {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Login Section */
+        .login-container {
+            max-width: 480px;
+            margin: 60px auto;
+        }
+
+        .login-card {
+            padding: 48px;
+            text-align: center;
+        }
+
+        .login-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #48bb78;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #cbd5e0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            border-color: #48bb78;
+            color: #48bb78;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a4731;
+            margin: 12px 0;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: #48bb78;
+        }
+
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            padding: 28px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .card-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header i {
+            color: #48bb78;
+            font-size: 1.3rem;
+        }
+
+        /* Profile Info */
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #718096;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* Advice Items */
+        .advice-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .advice-item {
+            background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 20px;
+            border-left: 4px solid #48bb78;
+            transition: all 0.2s;
+        }
+
+        .advice-item:hover {
+            transform: translateX(4px);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .advice-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .advice-content {
+            color: #4a5568;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Weather Widget */
+        .weather-widget {
+            margin-bottom: 24px;
+        }
+
+        .weather-main {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+        }
+
+        .weather-temp {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a4731;
+        }
+
+        /* Disease Detection */
+        .disease-upload {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .disease-upload:hover {
+            border-color: #48bb78;
+            background: #f7fafc;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f7fafc;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-bubble {
+            background: white;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            font-family: inherit;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+        }
+
+        /* Reminders */
+        .reminder-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .reminder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #f7fafc;
+            border-radius: 16px;
+            border-left: 4px solid;
+        }
+
+        .priority-high { border-left-color: #f56565; }
+        .priority-medium { border-left-color: #ed8936; }
+        .priority-low { border-left-color: #48bb78; }
+
+        .reminder-content {
+            flex: 1;
+        }
+
+        .reminder-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .reminder-date {
+            font-size: 0.75rem;
+            color: #a0aec0;
+        }
+
+        .reminder-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .reminder-form input, .reminder-form select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+        }
+
+        .btn-sm {
+            padding: 12px 20px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background: rgba(0,0,0,0.1);
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Hidden Class */
+        .hidden {
+            display: none;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #48bb78;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .reminder-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 12px;
+            }
+            .header {
+                padding: 20px;
+            }
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .weather-main {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">🌱</div>
+                    <div>
+                        <h1>FarmWise Advisor <span class="version-badge">v1.5</span></h1>
+                        <p>Intelligent farming companion for modern agriculture</p>
+                    </div>
+                </div>
+                <div class="server-status" id="serverStatus">
+                    <div class="status-dot"></div>
+                    <span>Connected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-container">
+            <div class="glass-card login-card">
+                <div class="login-icon">🌾</div>
+                <h2 style="margin-bottom: 8px;">Welcome to FarmWise v1.5</h2>
+                <p style="color: #718096; margin-bottom: 32px;">Intelligent farming assistant with new features!</p>
+                
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="demo@farmwise.com" value="demo@farmwise.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="password123" value="password123">
+                </div>
+                <button class="btn-primary" onclick="login()">Sign In</button>
+                <button class="btn-primary btn-secondary" onclick="showRegister()" style="margin-top: 12px;">Create New Account</button>
+                <p style="margin-top: 24px; font-size: 0.85rem; color: #a0aec0;">
+                    ✨ New in v1.5: Weather API • Disease Detection • Push Notifications
+                </p>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="login-container hidden">
+            <div class="glass-card login-card">
+                <div class="login-icon">📝</div>
+                <h2 style="margin-bottom: 8px;">Start Your Journey</h2>
+                <p style="color: #718096; margin-bottom: 32px;">Join thousands of successful farmers</p>
+                
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="John Farmer">
+                </div>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="regEmail" placeholder="farmer@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Minimum 6 characters">
+                </div>
+                <div class="input-group">
+                    <label>Region</label>
+                    <select id="regRegion">
+                        <option value="tropical">🌴 Tropical (Warm & Humid)</option>
+                        <option value="arid">🏜️ Arid / Semi-arid</option>
+                        <option value="temperate">🌳 Temperate (Four seasons)</option>
+                        <option value="mediterranean">🍋 Mediterranean</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Farm Type</label>
+                    <select id="regFarmType">
+                        <option value="crops">🌾 Crops / Plants</option>
+                        <option value="livestock">🐄 Livestock / Animals</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="register()">Create Account</button>
+                <button class="btn-primary btn-secondary" onclick="hideRegister()" style="margin-top: 12px;">Back to Sign In</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <!-- Stats Grid -->
+            <div class="dashboard-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">🌾</div>
+                    <div class="stat-value" id="statAdvice">0</div>
+                    <div class="stat-label">Personalized Tips</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">⏰</div>
+                    <div class="stat-value" id="statReminders">0</div>
+                    <div class="stat-label">Active Reminders</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-value" id="statChats">0</div>
+                    <div class="stat-label">AI Conversations</div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value" id="statScore">100%</div>
+                    <div class="stat-label">Farm Health Score</div>
+                </div>
+            </div>
+
+            <!-- Weather Widget (New v1.5 Feature) -->
+            <div id="weatherWidget" class="glass-card card weather-widget">
+                <div class="card-header">
+                    <h2><i class="fas fa-cloud-sun"></i> Weather & Farming Forecast</h2>
+                    <span class="version-badge" style="background: #48bb78;">v1.5 New</span>
+                </div>
+                <div id="weatherContent">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <!-- Farm Profile -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-circle"></i> Farm Profile</h2>
+                        <button class="btn-sm" onclick="refreshProfile()" style="background: #e2e8f0; color: #4a5568;">Refresh</button>
+                    </div>
+                    <div id="profileContent" class="profile-info">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <!-- Personalized Advice -->
+                <div class="glass-card card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-lightbulb"></i> Smart Insights</h2>
+                        <button class="btn-sm" onclick="loadAdvice()" style="background: #e2e8f0; color: #4a5568;">Refresh</button>
+                    </div>
+                    <div id="adviceContent" class="advice-list">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disease Detection (New v1.5 Feature) -->
+            <div class="glass-card card">
+                <div class="card-header">
+                    <h2><i class="fas fa-camera"></i> Plant Disease Detection</h2>
+                    <span class="version-badge" style="background: #48bb78;">AI-Powered</span>
+                </div>
+                <div class="disease-upload" onclick="document.getElementById('diseaseImage').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #48bb78;"></i>
+                    <p style="margin-top: 12px;">Upload a photo of your plant for instant diagnosis</p>
+                    <p style="font-size: 0.75rem; color: #a0aec0;">Supports JPEG, PNG (Max 5MB)</p>
+                    <input type="file" id="diseaseImage" accept="image/*" style="display: none;" onchange="detectDisease(this.files[0])">
+                </div>
+                <div id="diseaseResult" class="disease-result"></div>
+            </div>
+
+            <!-- AI Chatbot -->
+            <div class="glass-card card">
+                <div class="card-header">
+                    <h2><i class="fas fa-robot"></i> FarmWise AI Assistant</h2>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot">
+                            <div class="message-bubble">
+                                🤖 Hello! I'm your intelligent farming assistant. Ask me anything about crops, livestock, diseases, or seasonal planning!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Ask a question... (e.g., How to treat tomato blight?)" onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Reminders -->
+            <div class="glass-card card">
+                <div class="card-header">
+                    <h2><i class="fas fa-bell"></i> Smart Reminders</h2>
+                </div>
+                <div class="reminder-form">
+                    <input type="text" id="reminderTitle" placeholder="What needs to be done?">
+                    <input type="date" id="reminderDate">
+                    <select id="reminderPriority">
+                        <option value="high">🔴 High Priority</option>
+                        <option value="medium" selected>🟡 Medium Priority</option>
+                        <option value="low">🟢 Low Priority</option>
+                    </select>
+                    <button class="btn-sm" onclick="createReminder()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div id="reminderList" class="reminder-list">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Logout -->
+            <div style="text-align: center; margin-top: 24px;">
+                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        const API_URL = '';
+
+        // Show toast notification
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+            const color = type === 'success' ? '#48bb78' : '#f56565';
+            toast.innerHTML = '<i class="fas fa-' + icon + '" style="color: ' + color + ';"></i><span>' + message + '</span>';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Check server status
+        async function checkServer() {
+            try {
+                const res = await fetch('/api/health');
+                if (res.ok) {
+                    document.getElementById('serverStatus').innerHTML = '<div class="status-dot"></div><span>Connected v1.5</span>';
+                }
+            } catch(error) {
+                document.getElementById('serverStatus').innerHTML = '<div class="status-dot" style="background: #f56565;"></div><span>Offline</span>';
+            }
+        }
+
+        // Login
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    showToast('Welcome to FarmWise v1.5! 🌱', 'success');
+                    loadDashboardData();
+                } else {
+                    showToast(data.error || 'Login failed', 'error');
+                }
+            } catch(error) {
+                showToast('Connection error', 'error');
+            }
+        }
+
+        // Register
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const region = document.getElementById('regRegion').value;
+            const farm_type = document.getElementById('regFarmType').value;
+
+            if (!name || !email || !password) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, region, farm_type })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showToast('Account created! Please login.', 'success');
+                    hideRegister();
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').value = password;
+                } else {
+                    showToast(data.error || 'Registration failed', 'error');
+                }
+            } catch(error) {
+                showToast('Connection error', 'error');
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            await loadProfile();
+            await loadAdvice();
+            await loadReminders();
+            await loadWeather();
+            await loadStats();
+        }
+
+        // Load profile
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/farm/profile', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.profile) {
+                    const p = data.profile;
+                    let html = '';
+                    html += '<div class="info-row"><span class="info-label">Farmer Name</span><span class="info-value">' + escapeHtml(p.name) + '</span></div>';
+                    html += '<div class="info-row"><span class="info-label">Email</span><span class="info-value">' + escapeHtml(p.email) + '</span></div>';
+                    html += '<div class="info-row"><span class="info-label">Region</span><span class="info-value">' + escapeHtml(p.region) + '</span></div>';
+                    html += '<div class="info-row"><span class="info-label">Farm Type</span><span class="info-value">' + escapeHtml(p.farm_type) + '</span></div>';
+                    if (p.crop_type) html += '<div class="info-row"><span class="info-label">Main Crop</span><span class="info-value">' + escapeHtml(p.crop_type) + '</span></div>';
+                    if (p.livestock_type) html += '<div class="info-row"><span class="info-label">Livestock</span><span class="info-value">' + escapeHtml(p.livestock_type) + '</span></div>';
+                    document.getElementById('profileContent').innerHTML = html;
+                }
+            } catch(error) {
+                document.getElementById('profileContent').innerHTML = '<p style="color: #f56565;">Error loading profile</p>';
+            }
+        }
+
+        // Load advice
+        async function loadAdvice() {
+            try {
+                const res = await fetch('/api/advice/personalized', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.advice) {
+                    const adviceList = document.getElementById('adviceContent');
+                    adviceList.innerHTML = '';
+                    for (let i = 0; i < data.advice.length; i++) {
+                        const a = data.advice[i];
+                        adviceList.innerHTML += '<div class="advice-item"><div class="advice-title"><i class="fas fa-seedling" style="color: #48bb78;"></i> ' + escapeHtml(a.title) + '</div><div class="advice-content">' + escapeHtml(a.content) + '</div></div>';
+                    }
+                    document.getElementById('statAdvice').innerText = data.advice.length;
+                }
+            } catch(error) {
+                document.getElementById('adviceContent').innerHTML = '<p style="color: #f56565;">Error loading advice</p>';
+            }
+        }
+
+        // Load weather (v1.5 feature)
+        async function loadWeather() {
+            try {
+                const res = await fetch('/api/weather?city=London', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                const weatherContent = document.getElementById('weatherContent');
+                if (res.ok && data.current) {
+                    const temp = Math.round(data.current.main.temp);
+                    const condition = data.current.weather[0].description;
+                    const humidity = data.current.main.humidity;
+                    
+                    let weatherIcon = '🌤️';
+                    if (condition.includes('rain')) weatherIcon = '🌧️';
+                    else if (condition.includes('cloud')) weatherIcon = '☁️';
+                    else if (condition.includes('clear')) weatherIcon = '☀️';
+                    
+                    weatherContent.innerHTML = `
+                        <div class="weather-main">
+                            <div class="weather-icon">${weatherIcon}</div>
+                            <div>
+                                <div class="weather-temp">${temp}°C</div>
+                                <div>${condition}</div>
+                                <div>💧 Humidity: ${humidity}%</div>
+                            </div>
+                        </div>
+                        ${data.advice && data.advice.length > 0 ? `
+                            <div class="advice-list">
+                                ${data.advice.map(adv => `
+                                    <div class="advice-item" style="border-left-color: ${adv.type === 'warning' ? '#f56565' : '#48bb78'}">
+                                        <div class="advice-title">${adv.title}</div>
+                                        <div class="advice-content">${adv.message}</div>
+                                        <div style="margin-top: 8px;"><i class="fas fa-check-circle"></i> ${adv.action}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p style="color: #718096; text-align: center;">Add your OpenWeatherMap API key for real-time advice</p>'}
+                    `;
+                }
+            } catch(error) {
+                document.getElementById('weatherContent').innerHTML = '<p style="color: #f56565;">Weather service unavailable</p>';
+            }
+        }
+
+        // Disease Detection (v1.5 feature)
+        async function
