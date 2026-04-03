@@ -424,11 +424,11 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
 // SERVE STATIC FILES
 // ============================================
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'web', 'dashboard-v1.5.html'));
+    res.sendFile(path.join(__dirname, 'web', 'elegant-dashboard-v1.5.html'));
 });
 
 app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'web', 'dashboard-v1.5.html'));
+    res.sendFile(path.join(__dirname, 'web', 'elegant-dashboard-v1.5.html'));
 });
 
 // ============================================
