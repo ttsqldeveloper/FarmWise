@@ -12,9 +12,27 @@ const multer = require('multer');
 const sharp = require('sharp');
 const webpush = require('web-push');
 
+// Remove duplicate path require and optional TensorFlow
+// Only include if you have the model and installed @tensorflow/tfjs-node
+// const tf = require('@tensorflow/tfjs-node');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'farmwise-secret-key-2024';
+
+// Optional: Load ML model (commented out until you have the model file)
+// let model = null;
+// 
+// async function loadModel() {
+//     try {
+//         const modelPath = 'file://' + path.join(__dirname, 'models', 'model.json');
+//         model = await tf.loadLayersModel(modelPath);
+//         console.log('✅ Disease detection model loaded');
+//     } catch (err) {
+//         console.error('❌ Failed to load model:', err.message);
+//         console.log('⚠️  Disease detection will fall back to mock mode');
+//     }
+// }
 
 // ============================================
 // MIDDLEWARE
@@ -301,7 +319,110 @@ app.get('/api/weather', auth, (req, res) => {
 });
 
 // ============================================
-// DISEASE DETECTION ENDPOINT - ADDED
+// IMAGE PREPROCESSING FOR ML MODEL
+// ============================================
+
+/**
+ * Preprocess image for ML model input
+ * Requirements:
+ * - Resize to 224x224 pixels (standard for most vision models)
+ * - Convert to RGB (3 channels)
+ * - Normalize pixel values to [0, 1] range
+ * - Return as buffer or tensor
+ */
+async function preprocessImageForModel(imageBuffer) {
+    try {
+        // Step 1: Decode and convert to RGB (3 channels)
+        let image = sharp(imageBuffer);
+        
+        // Get metadata to check image properties
+        const metadata = await image.metadata();
+        
+        // Step 2: Ensure RGB color space (3 channels)
+        if (metadata.channels !== 3) {
+            image = image.toColourspace('rgb');
+        }
+        
+        // Step 3: Resize to 224x224 pixels (standard input size)
+        image = image.resize(224, 224, {
+            fit: 'cover',           // Cover the area, crop if needed
+            position: 'centre',     // Center crop
+            background: { r: 0, g: 0, b: 0 }  // Black background for padding
+        });
+        
+        // Step 4: Convert to normalized float values [0, 1]
+        // Sharp outputs 0-255 uint8, we need to convert to 0-1 float
+        const processedBuffer = await image
+            .removeAlpha()          // Remove alpha channel if present
+            .raw()                  // Get raw pixel data
+            .toBuffer();
+        
+        // Step 5: Convert buffer to float array and normalize
+        const pixels = new Float32Array(processedBuffer.length);
+        for (let i = 0; i < processedBuffer.length; i++) {
+            pixels[i] = processedBuffer[i] / 255.0;  // Normalize to [0, 1]
+        }
+        
+        // Step 6: Create tensor shape [1, 224, 224, 3] (batch, height, width, channels)
+        // This format is ready for TensorFlow.js or other ML frameworks
+        const inputTensor = {
+            shape: [1, 224, 224, 3],
+            data: pixels,
+            dtype: 'float32'
+        };
+        
+        return {
+            success: true,
+            tensor: inputTensor,
+            metadata: {
+                originalSize: `${metadata.width}x${metadata.height}`,
+                processedSize: '224x224',
+                channels: 3,
+                format: 'float32'
+            }
+        };
+        
+    } catch (error) {
+        console.error('Image preprocessing error:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Alternative: Get image as normalized buffer for external API calls
+ * (Use this if you're calling an external ML API like Plant.id or TensorFlow Serving)
+ */
+async function getNormalizedImageBuffer(imageBuffer) {
+    try {
+        const processedBuffer = await sharp(imageBuffer)
+            .resize(224, 224, { fit: 'cover' })
+            .removeAlpha()
+            .raw()
+            .toBuffer();
+        
+        // Normalize to [0, 1] and convert to Base64 for API calls
+        const floatValues = [];
+        for (let i = 0; i < processedBuffer.length; i++) {
+            floatValues.push(processedBuffer[i] / 255.0);
+        }
+        
+        return {
+            success: true,
+            data: floatValues,
+            shape: [1, 224, 224, 3],
+            base64: Buffer.from(processedBuffer).toString('base64')
+        };
+        
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================
+// DISEASE DETECTION ENDPOINT - UPDATED with preprocessing
 // ============================================
 app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) => {
     if (!req.file) {
@@ -309,8 +430,14 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
     }
     
     try {
-        // Process image with Sharp (resize for consistency)
-        await sharp(req.file.buffer).resize(224, 224, { fit: 'cover' }).toBuffer();
+        // STEP 1: Preprocess the image for ML model
+        const processed = await preprocessImageForModel(req.file.buffer);
+        
+        if (!processed.success) {
+            return res.status(400).json({ error: 'Image preprocessing failed: ' + processed.error });
+        }
+        
+        console.log('Image preprocessing complete:', processed.metadata);
         
         // Disease database with real information
         const diseases = [
@@ -362,7 +489,7 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
         ];
         
         // For demo, randomly select a disease
-        // In production, replace with actual ML model inference
+        // In production, replace with actual ML model inference using processed.tensor
         const detection = diseases[Math.floor(Math.random() * diseases.length)];
         
         res.json({
@@ -373,6 +500,11 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
                 severity: detection.severity
             },
             treatment: detection.treatment,
+            preprocessing: {
+                originalSize: processed.metadata.originalSize,
+                processedSize: processed.metadata.processedSize,
+                normalized: true
+            },
             image_processed: true,
             timestamp: new Date().toISOString()
         });
@@ -408,7 +540,7 @@ createDemoUser().then(() => {
         console.log(`💚 Health: http://localhost:${PORT}/api/health`);
         console.log(`\n✨ FEATURES:`);
         console.log(`   🌤️  Weather API`);
-        console.log(`   📸 Disease Detection`);
+        console.log(`   📸 Disease Detection (with preprocessing)`);
         console.log(`   🤖 AI Chatbot`);
         console.log(`   ⏰ Smart Reminders`);
         console.log(`\n📝 Demo Account:`);
