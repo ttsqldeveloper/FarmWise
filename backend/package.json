@@ -1,21 +1,18 @@
 {
   "name": "farmwise-backend",
   "version": "1.5.0",
-  "description": "FarmWise v1.5 - Intelligent Farming Assistant with Weather API, Disease Detection, and Push Notifications",
+  "description": "FarmWise Advisor v1.5 - Weather API, Disease Detection, Push Notifications",
   "main": "production-server-v1.5.js",
   "scripts": {
-    "start": "node production-server-v1.5.js",
-    "dev": "nodemon server.js"
+    "start": "node production-server-v1.5.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
     "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "sharp": "^0.33.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "sharp": "^0.33.0",
+    "web-push": "^3.6.6"
   }
 }
