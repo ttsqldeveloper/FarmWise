@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FarmWise</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input, button { padding: 10px; margin: 5px; }
+        button { background: #48bb78; color: white; border: none; cursor: pointer; }
+        .hidden { display: none; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🌱 FarmWise Advisor</h1>
+
+    <!-- Login Form -->
+    <div id="loginForm" class="card">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" value="demo@farmwise.com"><br>
+        <input type="password" id="password" placeholder="Password" value="password123"><br>
+        <button onclick="login()">Sign In</button>
+        <p id="loginError" class="error"></p>
+    </div>
+
+    <!-- Dashboard (hidden until login) -->
+    <div id="dashboard" class="hidden">
+        <div class="card">
+            <h2>Welcome, <span id="userName">Farmer</span>!</h2>
+            <p>Email: <span id="userEmail"></span></p>
+            <p>Region: <span id="userRegion"></span></p>
+            <p>Farm Type: <span id="userFarmType"></span></p>
+        </div>
+        <div class="card">
+            <h2>AI Assistant</h2>
+            <input type="text" id="question" placeholder="Ask a question..." style="width: 70%;">
+            <button onclick="askQuestion()">Ask</button>
+            <p id="answer"></p>
+        </div>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        let token = '';
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    token = data.token;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    
+                    // Load profile
+                    const profileRes = await fetch('/api/farm/profile', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const profile = await profileRes.json();
+                    if (profile.profile) {
+                        document.getElementById('userName').innerText = profile.profile.name;
+                        document.getElementById('userEmail').innerText = profile.profile.email;
+                        document.getElementById('userRegion').innerText = profile.profile.region;
+                        document.getElementById('userFarmType').innerText = profile.profile.farm_type;
+                    }
+                } else {
+                    document.getElementById('loginError').innerText = data.error || 'Login failed';
+                }
+            } catch (err) {
+                document.getElementById('loginError').innerText = 'Connection error: ' + err.message;
+            }
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            if (!question) return;
+
+            try {
+                const res = await fetch('/api/chatbot/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+                document.getElementById('answer').innerHTML = '<strong>AI:</strong> ' + data.answer;
+            } catch (err) {
+                document.getElementById('answer').innerHTML = '<span class="error">Error: ' + err.message + '</span>';
+            }
+        }
+
+        function logout() {
+            token = '';
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('question').value = '';
+            document.getElementById('answer').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

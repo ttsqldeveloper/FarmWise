@@ -5,6 +5,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');  // ADDED - needed for sendFile
 const multer = require('multer');
 const sharp = require('sharp');
 const webpush = require('web-push');
@@ -19,13 +20,12 @@ const PORT = 3001;
 // CONFIGURATION
 // ============================================
 // Get your free API key from: https://openweathermap.org/api
-const WEATHER_API_KEY =  '011ac7437d868b5a6b10328743025589'; // Replace with your actual API key
+const WEATHER_API_KEY = '011ac7437d868b5a6b10328743025589';
 
-// VAPID Keys for Push Notifications (generate with: npx web-push generate-vapid-keys)
-const VAPID_PUBLIC_KEY = 'BAYVyWAB9E08bgRHt1NxDt4hFnrbuDCdMezwR1YKU8vbynq5Qk-odd35HKHgpC5mjc6hL6aEvHnMXhYJD1WI2Gs'; // Replace with your generated public key
-const VAPID_PRIVATE_KEY = '_QbBo8suEHSl34Q4lByzsyhNWpg42dqZdsCZs8pwEks'; // Replace with your generated private key
+// VAPID Keys for Push Notifications
+const VAPID_PUBLIC_KEY = 'BAYVyWAB9E08bgRHt1NxDt4hFnrbuDCdMezwR1YKU8vbynq5Qk-odd35HKHgpC5mjc6hL6aEvHnMXhYJD1WI2Gs';
+const VAPID_PRIVATE_KEY = '_QbBo8suEHSl34Q4lByzsyhNWpg42dqZdsCZs8pwEks';
 
-// Configure web-push if VAPID keys are set
 if (VAPID_PUBLIC_KEY !== 'BAYVyWAB9E08bgRHt1NxDt4hFnrbuDCdMezwR1YKU8vbynq5Qk-odd35HKHgpC5mjc6hL6aEvHnMXhYJD1WI2Gs' && VAPID_PRIVATE_KEY !== '_QbBo8suEHSl34Q4lByzsyhNWpg42dqZdsCZs8pwEks') {
     webpush.setVapidDetails(
         'mailto:farmwise@example.com',
@@ -44,7 +44,7 @@ app.use(express.json());
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (allowedTypes.includes(file.mimetype)) {
@@ -101,19 +101,8 @@ const auth = (req, res, next) => {
 // ROOT AND HEALTH ENDPOINTS
 // ============================================
 app.get('/', (req, res) => {
-    res.json({
-        name: 'FarmWise API',
-        version: '1.5.0',
-        status: 'running',
-        features: ['Weather API', 'Disease Detection', 'Push Notifications', 'Mobile Responsive'],
-        endpoints: {
-            health: '/api/health',
-            weather: '/api/weather',
-            disease: 'POST /api/detect-disease',
-            notifications: '/api/notifications/subscribe',
-            auth: '/api/auth/login & /api/auth/register'
-        }
-    });
+    // Redirect to dashboard
+    res.redirect('/dashboard');
 });
 
 app.get('/api/health', (req, res) => {
@@ -123,6 +112,15 @@ app.get('/api/health', (req, res) => {
         features: ['weather', 'disease-detection', 'notifications'],
         timestamp: new Date().toISOString() 
     });
+});
+
+// ============================================
+// SERVE STATIC FILES AND DASHBOARD
+// ============================================
+
+// Serve the elegant dashboard at /dashboard
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'web', 'elegant-dashboard-v1.5.html'));
 });
 
 // ============================================
@@ -337,12 +335,11 @@ app.delete('/api/reminders/:id', auth, (req, res) => {
 });
 
 // ============================================
-// WEATHER API ENDPOINT (Using Native Fetch)
+// WEATHER API ENDPOINT
 // ============================================
 app.get('/api/weather', auth, async (req, res) => {
     const { city, lat, lon } = req.query;
     
-    // If no API key, return mock data
     if (!WEATHER_API_KEY || WEATHER_API_KEY === 'YOUR_API_KEY_HERE') {
         return res.json({
             current: {
@@ -370,7 +367,6 @@ app.get('/api/weather', auth, async (req, res) => {
             return res.status(400).json({ error: 'City or coordinates required' });
         }
         
-        // Using native fetch (Node.js 18+)
         const weatherResponse = await fetch(weatherUrl);
         const weatherData = await weatherResponse.json();
         
@@ -378,7 +374,6 @@ app.get('/api/weather', auth, async (req, res) => {
             return res.status(500).json({ error: weatherData.message });
         }
         
-        // Generate farming advice
         const advice = [];
         const temp = weatherData.main?.temp;
         const humidity = weatherData.main?.humidity;
@@ -429,34 +424,12 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
     }
     
     try {
-        // Process image with Sharp
-        const processedImage = await sharp(req.file.buffer)
-            .resize(224, 224, { fit: 'cover' })
-            .toBuffer();
+        await sharp(req.file.buffer).resize(224, 224, { fit: 'cover' }).toBuffer();
         
-        // Simulate disease detection (in production, use actual ML model)
         const diseases = [
-            {
-                name: 'Tomato Late Blight',
-                confidence: 0.87,
-                symptoms: 'Brown spots on leaves, white fungal growth, fruit rot',
-                severity: 'high',
-                affected_parts: ['leaves', 'stems', 'fruits']
-            },
-            {
-                name: 'Powdery Mildew',
-                confidence: 0.82,
-                symptoms: 'White powdery spots on leaves, stunted growth',
-                severity: 'medium',
-                affected_parts: ['leaves', 'stems']
-            },
-            {
-                name: 'Healthy Plant',
-                confidence: 0.94,
-                symptoms: 'No visible issues, vibrant green color',
-                severity: 'none',
-                affected_parts: []
-            }
+            { name: 'Tomato Late Blight', confidence: 0.87, symptoms: 'Brown spots on leaves, white fungal growth', severity: 'high' },
+            { name: 'Powdery Mildew', confidence: 0.82, symptoms: 'White powdery spots on leaves', severity: 'medium' },
+            { name: 'Healthy Plant', confidence: 0.94, symptoms: 'No visible issues', severity: 'none' }
         ];
         
         const detection = diseases[Math.floor(Math.random() * diseases.length)];
@@ -469,67 +442,36 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
                     'Apply copper-based fungicide every 7-10 days',
                     'Improve air circulation by pruning',
                     'Water at base only, avoid wetting leaves',
-                    'Apply thick mulch to prevent soil splash',
-                    'Rotate crops next season (3-4 year rotation)'
+                    'Apply thick mulch to prevent soil splash'
                 ],
-                prevention: [
-                    'Plant resistant varieties',
-                    'Maintain proper plant spacing (45-60cm)',
-                    'Water early morning only',
-                    'Remove plant debris after harvest'
-                ],
-                urgency: 'high',
-                organic_solution: 'Apply compost tea and neem oil weekly'
+                urgency: 'high'
             },
             'Powdery Mildew': {
                 title: '🌿 Powdery Mildew Treatment',
                 steps: [
                     'Apply neem oil or sulfur-based fungicide',
                     'Remove severely infected leaves',
-                    'Increase air circulation through pruning',
-                    'Avoid high-nitrogen fertilizers',
-                    'Water plants in morning only'
+                    'Increase air circulation through pruning'
                 ],
-                prevention: [
-                    'Choose resistant varieties',
-                    'Space plants properly',
-                    'Avoid overhead watering',
-                    'Apply preventive sulfur sprays'
-                ],
-                urgency: 'medium',
-                organic_solution: 'Mix 1 tbsp baking soda + 1 tsp soap in 1 gallon water, spray weekly'
+                urgency: 'medium'
             },
             'Healthy Plant': {
                 title: '✅ Your Plant Looks Healthy!',
                 steps: [
                     'Continue regular maintenance',
-                    'Monitor weekly for early signs of disease',
-                    'Maintain consistent watering schedule',
-                    'Apply preventive organic sprays monthly'
+                    'Monitor weekly for early signs',
+                    'Maintain consistent watering'
                 ],
-                prevention: [
-                    'Regular inspection',
-                    'Good cultural practices',
-                    'Companion planting',
-                    'Crop rotation'
-                ],
-                urgency: 'none',
-                organic_solution: 'Apply compost tea monthly for immune support'
+                urgency: 'none'
             }
         };
         
-        const treatment = treatments[detection.name] || treatments['Healthy Plant'];
+        const treatment = treatments[detection.name];
         
-        res.json({
-            detection: detection,
-            treatment: treatment,
-            image_processed: true,
-            timestamp: new Date().toISOString()
-        });
+        res.json({ detection, treatment, image_processed: true });
         
     } catch (error) {
-        console.error('Disease detection error:', error);
-        res.status(500).json({ error: 'Detection service error. Please try again.' });
+        res.status(500).json({ error: 'Detection service error' });
     }
 });
 
@@ -563,129 +505,10 @@ app.get('/test', (req, res) => {
     res.send(`
         <!DOCTYPE html>
         <html>
-        <head>
-            <title>FarmWise v1.5 Test Interface</title>
-            <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    min-height: 100vh;
-                    padding: 20px;
-                }
-                .container { max-width: 800px; margin: 0 auto; }
-                .card {
-                    background: white;
-                    border-radius: 20px;
-                    padding: 30px;
-                    margin-bottom: 20px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                }
-                h1 { color: #2d3748; margin-bottom: 10px; }
-                h2 { color: #2d3748; margin-bottom: 15px; font-size: 1.3rem; }
-                button {
-                    background: #48bb78;
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 10px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    margin: 5px;
-                    transition: all 0.3s;
-                }
-                button:hover {
-                    background: #38a169;
-                    transform: translateY(-2px);
-                }
-                input {
-                    padding: 12px;
-                    margin: 8px;
-                    border: 2px solid #e2e8f0;
-                    border-radius: 10px;
-                    width: 250px;
-                }
-                pre {
-                    background: #f7fafc;
-                    padding: 15px;
-                    border-radius: 10px;
-                    overflow-x: auto;
-                    margin-top: 15px;
-                    font-size: 12px;
-                }
-                .success { color: #48bb78; }
-                .error { color: #f56565; }
-                .version-badge {
-                    display: inline-block;
-                    background: #48bb78;
-                    color: white;
-                    padding: 2px 8px;
-                    border-radius: 20px;
-                    font-size: 0.7rem;
-                    margin-left: 10px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="card">
-                    <h1>🌱 FarmWise Advisor <span class="version-badge">v1.5</span></h1>
-                    <p>Intelligent Farming Companion | New Features: Weather API, Disease Detection, Push Notifications</p>
-                </div>
-                
-                <div class="card">
-                    <h2>📡 Server Status</h2>
-                    <button onclick="checkHealth()">Check Health</button>
-                    <pre id="health"></pre>
-                </div>
-                
-                <div class="card">
-                    <h2>🔐 Login</h2>
-                    <input type="email" id="email" placeholder="Email" value="demo@farmwise.com">
-                    <input type="password" id="password" placeholder="Password" value="password123">
-                    <button onclick="login()">Login</button>
-                    <pre id="loginResult"></pre>
-                </div>
-            </div>
-            
-            <script>
-                let token = '';
-                
-                async function checkHealth() {
-                    try {
-                        const res = await fetch('/api/health');
-                        const data = await res.json();
-                        document.getElementById('health').innerText = JSON.stringify(data, null, 2);
-                    } catch(e) {
-                        document.getElementById('health').innerText = 'Error: ' + e.message;
-                    }
-                }
-                
-                async function login() {
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-                    
-                    try {
-                        const res = await fetch('/api/auth/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password })
-                        });
-                        const data = await res.json();
-                        
-                        if (res.ok) {
-                            token = data.token;
-                            document.getElementById('loginResult').innerHTML = '<div class="success">✅ Login successful! Welcome to FarmWise v1.5</div>';
-                        } else {
-                            document.getElementById('loginResult').innerHTML = '<div class="error">❌ ' + (data.error || 'Login failed') + '</div>';
-                        }
-                    } catch(e) {
-                        document.getElementById('loginResult').innerHTML = '<div class="error">❌ Error: ' + e.message + '</div>';
-                    }
-                }
-                
-                checkHealth();
-            </script>
+        <head><title>FarmWise v1.5 Test</title></head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🌱 FarmWise API Test</h1>
+            <p>Server is running! <a href="/dashboard">Go to Dashboard</a></p>
         </body>
         </html>
     `);
@@ -731,18 +554,16 @@ app.listen(PORT, () => {
     console.log('║     Intelligent Farming Companion                            ║');
     console.log('╚══════════════════════════════════════════════════════════════╝');
     console.log(`\n📡 Server: http://localhost:${PORT}`);
-    console.log(`🧪 Test Interface: http://localhost:${PORT}/test`);
+    console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
+    console.log(`🧪 Test: http://localhost:${PORT}/test`);
     console.log(`💚 Health: http://localhost:${PORT}/api/health`);
-    console.log(`\n✨ NEW FEATURES in v1.5:`);
-    console.log(`   🌤️  Weather API Integration (Native Fetch)`);
-    console.log(`   📸 Plant Disease Detection (AI-Powered)`);
-    console.log(`   🔔 Push Notifications (Web Push)`);
-    console.log(`   📱 Mobile Responsive Improvements`);
+    console.log(`\n✨ FEATURES:`);
+    console.log(`   🌤️  Weather API Integration`);
+    console.log(`   📸 Plant Disease Detection`);
+    console.log(`   🔔 Push Notifications`);
+    console.log(`   📱 Mobile Responsive`);
     console.log(`\n📝 Demo Account:`);
     console.log(`   Email: demo@farmwise.com`);
     console.log(`   Password: password123`);
-    console.log(`\n📊 System Info:`);
-    console.log(`   Node.js Version: ${process.version}`);
-    console.log(`   Platform: ${process.platform}`);
     console.log(`\n✅ Server is ready! Press Ctrl+C to stop.\n`);
 });
