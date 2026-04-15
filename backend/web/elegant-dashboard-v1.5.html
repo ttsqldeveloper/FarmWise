@@ -70,53 +70,90 @@
         .message.bot { background: #e2e8f0; color: #2d3748; }
         .reminder-item { padding: 12px; background: #f7fafc; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #48bb78; }
         
-        /* Disease Detection Styles */
-        .disease-upload-area {
-            border: 2px dashed #cbd5e0;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #f7fafc;
-        }
-        .disease-upload-area:hover {
-            border-color: #48bb78;
-            background: #f0fff4;
-        }
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin: 15px auto;
-            border-radius: 10px;
-            display: none;
-        }
-        .confidence-high { color: #48bb78; font-weight: bold; }
-        .confidence-medium { color: #ed8936; font-weight: bold; }
-        .confidence-low { color: #f56565; font-weight: bold; }
-        .detection-result {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f7fafc;
-            border-radius: 10px;
-            border-left: 4px solid #48bb78;
-        }
-        @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: repeat(2,1fr); }
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #48bb78;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
+       /* Disease Detection Styles */
+.disease-upload-area {
+    border: 2px dashed #cbd5e0;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f7fafc;
+}
+
+.disease-upload-area:hover {
+    border-color: #48bb78;
+    background: #f0fff4;
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    margin: 15px auto;
+    border-radius: 12px;
+    display: none;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Confidence Level Colors */
+.confidence-high {
+    color: #48bb78;
+}
+
+.confidence-medium {
+    color: #ed8936;
+}
+
+.confidence-low {
+    color: #f56565;
+}
+
+/* Detection Result */
+.detection-result {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner Animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #48bb78;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: white;
+    padding: 14px 24px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+    z-index: 1000;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
     </style>
 </head>
 <body>
@@ -183,29 +220,32 @@
             <div id="weatherContent">Loading...</div>
         </div>
 
-        <!-- DISEASE DETECTION SECTION -->
-        <div class="card" id="diseaseCard">
-            <h3>📸 AI Disease Detection <span style="background: #48bb78; color: white; font-size: 12px; padding: 2px 8px; border-radius: 20px; margin-left: 10px;">v1.5 New</span></h3>
-            <p style="color: #718096; margin-bottom: 15px;">Upload a photo of your plant for instant AI-powered disease diagnosis</p>
-            
-            <div class="disease-upload-area" onclick="document.getElementById('diseaseImage').click()">
-                <div style="font-size: 48px;">📸</div>
-                <p style="margin-top: 10px;">Click to upload or drag and drop</p>
-                <p style="font-size: 12px; color: #a0aec0;">Supports JPEG, PNG (Max 5MB)</p>
-                <input type="file" id="diseaseImage" accept="image/*" style="display: none;" onchange="previewImage(this.files[0])">
-            </div>
-            
-            <img id="imagePreview" class="image-preview" alt="Image preview">
-            
-            <div id="detectionLoading" style="display: none; text-align: center; padding: 20px;">
-                <div class="spinner"></div>
-                <p style="margin-top: 10px;">Analyzing image with AI...</p>
-            </div>
-            
-            <div id="detectionResult"></div>
-            
-            <button id="detectBtn" onclick="detectDisease()" style="width: 100%; margin-top: 15px; display: none;">🔬 Analyze Disease</button>
-        </div>
+        <!-- Disease Detection Section -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="fas fa-camera"></i> AI Disease Detection</h2>
+        <span class="version-badge" style="background: #48bb78;">v1.5 New</span>
+    </div>
+    
+    <!-- Upload Area -->
+    <div class="disease-upload-area" onclick="document.getElementById('diseaseImage').click()">
+        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #48bb78;"></i>
+        <p style="margin-top: 10px;"><strong>Click to upload or drag and drop</strong></p>
+        <p style="font-size: 12px; color: #a0aec0;">Supports JPEG, PNG (Max 5MB)</p>
+        <input type="file" id="diseaseImage" accept="image/*" style="display: none;" onchange="previewImage(this.files[0])">
+    </div>
+    
+    <!-- Image Preview -->
+    <img id="imagePreview" class="image-preview" alt="Image preview">
+    
+    <!-- Analyze Button -->
+    <button id="detectBtn" onclick="detectDisease(document.getElementById('diseaseImage').files[0])" style="width: 100%; margin-top: 15px; display: none;">
+        <i class="fas fa-microscope"></i> Analyze Disease
+    </button>
+    
+    <!-- Results Container -->
+    <div id="diseaseResult"></div>
+</div>
 
         <div class="card">
             <h3>🤖 AI Assistant</h3>
@@ -281,84 +321,274 @@
         reader.readAsDataURL(file);
     }
 
-    // Disease Detection
-    async function detectDisease() {
-        if (!currentImageFile) {
-            alert('Please select an image first');
-            return;
-        }
+  // ============================================
+// ENHANCED DISEASE DETECTION FUNCTION
+// Handles the new response format with confidence levels and treatment
+// ============================================
 
-        const loadingDiv = document.getElementById('detectionLoading');
-        const resultDiv = document.getElementById('detectionResult');
-        const detectBtn = document.getElementById('detectBtn');
-        
-        loadingDiv.style.display = 'block';
-        detectBtn.disabled = true;
-        resultDiv.innerHTML = '';
-
-        const formData = new FormData();
-        formData.append('image', currentImageFile);
-
-        try {
-            const res = await apiFetch('/api/detect-disease', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            
-            const data = await res.json();
-            loadingDiv.style.display = 'none';
-            detectBtn.disabled = false;
-            
-            if (res.ok && data.detection) {
-                const confidencePercent = Math.round(data.detection.confidence * 100);
-                let confidenceClass = 'confidence-high';
-                if (confidencePercent < 70) confidenceClass = 'confidence-low';
-                else if (confidencePercent < 85) confidenceClass = 'confidence-medium';
-                
-                let urgencyHtml = '';
-                if (data.detection.severity === 'high') {
-                    urgencyHtml = '<span style="background: #f56565; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px;">⚠️ Urgent</span>';
-                } else if (data.detection.severity === 'medium') {
-                    urgencyHtml = '<span style="background: #ed8936; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px;">⚠️ Moderate</span>';
-                } else {
-                    urgencyHtml = '<span style="background: #48bb78; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px;">✅ Healthy</span>';
-                }
-                
-                resultDiv.innerHTML = `
-                    <div class="detection-result">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-                            <h4 style="color: #1a4731;">🔬 Diagnosis Result</h4>
-                            ${urgencyHtml}
-                        </div>
-                        <p><strong>Disease:</strong> ${data.detection.name}</p>
-                        <p><strong>Confidence:</strong> <span class="${confidenceClass}">${confidencePercent}%</span></p>
-                        <p><strong>Symptoms:</strong> ${data.detection.symptoms}</p>
-                        ${data.treatment ? `
-                            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
-                                <strong>💊 Recommended Treatment:</strong>
-                                <ul style="margin-left: 20px; margin-top: 8px;">
-                                    ${data.treatment.steps.map(step => `<li>${step}</li>`).join('')}
-                                </ul>
-                                ${data.treatment.organic_solution ? `<p style="margin-top: 10px;"><strong>🌱 Organic Solution:</strong> ${data.treatment.organic_solution}</p>` : ''}
-                                ${data.treatment.prevention ? `<p style="margin-top: 10px;"><strong>🛡️ Prevention:</strong> ${data.treatment.prevention.join(', ')}</p>` : ''}
-                            </div>
-                        ` : ''}
-                        <p style="margin-top: 10px; font-size: 12px; color: #a0aec0;">AI analysis completed at ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `<div class="error">❌ Detection failed: ${data.error || 'Unknown error'}</div>`;
-            }
-        } catch (error) {
-            loadingDiv.style.display = 'none';
-            detectBtn.disabled = false;
-            resultDiv.innerHTML = `<div class="error">❌ Error connecting to disease detection service: ${error.message}</div>`;
-            console.error('Disease detection error:', error);
-        }
+async function detectDisease(file) {
+    if (!file) {
+        showToast('Please select an image first', 'error');
+        return;
     }
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showToast('Please upload an image file (JPEG, PNG)', 'error');
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('File too large. Maximum size is 5MB', 'error');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('diseaseResult');
+    const detectBtn = document.getElementById('detectBtn');
+    
+    // Show loading state
+    resultDiv.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #48bb78;">🔬 Analyzing image with AI...</p>
+            <p style="font-size: 12px; color: #a0aec0;">This may take a few seconds</p>
+        </div>
+    `;
+    
+    if (detectBtn) detectBtn.disabled = true;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch('/api/detect-disease', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+                // Don't set Content-Type - let browser set it with boundary
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || `Server error: ${response.status}`);
+        }
+        
+        if (data.success === false) {
+            throw new Error(data.error || 'Detection failed');
+        }
+        
+        // Display the results using the new format
+        displayDetectionResults(data);
+        
+        showToast('Disease analysis complete!', 'success');
+        
+    } catch (error) {
+        console.error('Disease detection error:', error);
+        resultDiv.innerHTML = `
+            <div class="error" style="margin-top: 15px;">
+                <i class="fas fa-exclamation-circle"></i> 
+                <strong>Detection failed</strong><br>
+                ${error.message}<br>
+                <small style="font-size: 12px;">Please try again with a clearer image.</small>
+            </div>
+        `;
+        showToast('Disease detection failed: ' + error.message, 'error');
+    } finally {
+        if (detectBtn) detectBtn.disabled = false;
+    }
+}
+
+// ============================================
+// DISPLAY DETECTION RESULTS
+// ============================================
+
+function displayDetectionResults(data) {
+    const resultDiv = document.getElementById('diseaseResult');
+    
+    // Extract data from response
+    const detection = data.detection;
+    const treatment = data.treatment;
+    const metadata = data.metadata || {};
+    
+    if (!detection) {
+        resultDiv.innerHTML = `<div class="error">Invalid response format from server</div>`;
+        return;
+    }
+    
+    // Determine colors based on severity and confidence
+    const severityColors = {
+        high: { bg: '#fff5f5', border: '#f56565', badge: '#f56565', text: '#c53030' },
+        medium: { bg: '#fffaf0', border: '#ed8936', badge: '#ed8936', text: '#c05621' },
+        low: { bg: '#fefcbf', border: '#ecc94b', badge: '#ecc94b', text: '#975a16' },
+        none: { bg: '#f0fff4', border: '#48bb78', badge: '#48bb78', text: '#22543d' }
+    };
+    
+    const severity = detection.severity || 'none';
+    const colors = severityColors[severity] || severityColors.none;
+    
+    // Confidence level styling
+    const confidencePercent = detection.confidencePercent || Math.round(detection.confidence * 100);
+    let confidenceClass = 'confidence-low';
+    let confidenceText = 'Low Confidence';
+    
+    if (confidencePercent >= 85) {
+        confidenceClass = 'confidence-high';
+        confidenceText = 'High Confidence';
+    } else if (confidencePercent >= 70) {
+        confidenceClass = 'confidence-medium';
+        confidenceText = 'Medium Confidence';
+    }
+    
+    // Severity badge text
+    let severityText = 'Information Only';
+    if (detection.severity === 'high') severityText = '⚠️ URGENT - Act Immediately';
+    else if (detection.severity === 'medium') severityText = '⚠️ Moderate - Address Soon';
+    else if (detection.severity === 'low') severityText = 'ℹ️ Low - Monitor';
+    else if (detection.severity === 'none') severityText = '✅ Healthy';
+    
+    // Build the HTML
+    let html = `
+        <div class="detection-result" style="margin-top: 20px; background: ${colors.bg}; border-left: 4px solid ${colors.border}; border-radius: 12px; padding: 20px;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3 style="color: #1a4731; margin: 0;">
+                    <i class="fas fa-microscope" style="color: ${colors.badge};"></i> 
+                    Diagnosis Result
+                </h3>
+                <span style="background: ${colors.badge}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                    ${severityText}
+                </span>
+            </div>
+            
+            <!-- Disease Name -->
+            <div style="margin-bottom: 15px;">
+                <strong style="font-size: 1.1rem;">🦠 Disease:</strong>
+                <span style="font-size: 1.1rem; font-weight: 600; color: #2d3748;">${escapeHtml(detection.name)}</span>
+            </div>
+            
+            <!-- Confidence Score with Progress Bar -->
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong>🎯 Confidence:</strong>
+                    <span class="${confidenceClass}" style="font-weight: 600;">${confidencePercent}% (${confidenceText})</span>
+                </div>
+                <div style="background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div style="width: ${confidencePercent}%; background: ${colors.border}; height: 100%; border-radius: 10px; transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+            
+            <!-- Affected Parts -->
+            ${detection.affectedParts && detection.affectedParts.length > 0 ? `
+                <div style="margin-bottom: 15px;">
+                    <strong>📍 Affected Parts:</strong>
+                    <div style="margin-top: 5px;">
+                        ${detection.affectedParts.map(part => `
+                            <span style="display: inline-block; background: #edf2f7; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; margin-bottom: 5px;">
+                                ${escapeHtml(part)}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            
+            <!-- Symptoms -->
+            <div style="margin-bottom: 15px; background: #f7fafc; padding: 12px; border-radius: 10px;">
+                <strong>📋 Symptoms:</strong>
+                <p style="margin-top: 8px; margin-bottom: 0; color: #4a5568;">${escapeHtml(detection.symptoms)}</p>
+            </div>
+    `;
+    
+    // Treatment section
+    if (treatment && treatment.steps && treatment.steps.length > 0) {
+        html += `
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #e2e8f0;">
+                <strong>💊 Recommended Treatment:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
+                    ${treatment.steps.map(step => `<li style="margin-bottom: 8px;">${escapeHtml(step)}</li>`).join('')}
+                </ul>
+        `;
+        
+        if (treatment.organicSolution) {
+            html += `
+                <div style="background: #f0fff4; padding: 12px; border-radius: 10px; margin-top: 10px;">
+                    <strong>🌱 Organic Solution:</strong>
+                    <p style="margin-top: 5px; margin-bottom: 0; color: #2f855a;">${escapeHtml(treatment.organicSolution)}</p>
+                </div>
+            `;
+        }
+        
+        if (treatment.urgency) {
+            const urgencyColors = {
+                high: '#f56565',
+                medium: '#ed8936',
+                low: '#ecc94b',
+                none: '#48bb78'
+            };
+            html += `
+                <div style="margin-top: 10px;">
+                    <span style="background: ${urgencyColors[treatment.urgency] || '#718096'}; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px;">
+                        ${treatment.urgency.toUpperCase()} Priority
+                    </span>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+    }
+    
+    // Prevention section
+    if (treatment && treatment.prevention && treatment.prevention.length > 0) {
+        html += `
+            <div style="margin-top: 15px;">
+                <strong>🛡️ Prevention Tips:</strong>
+                <ul style="margin-left: 20px; margin-top: 8px; margin-bottom: 0;">
+                    ${treatment.prevention.map(item => `<li style="margin-bottom: 5px;">${escapeHtml(item)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Metadata / Timestamp
+    html += `
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #a0aec0;">
+                <i class="far fa-clock"></i> Analysis completed: ${new Date().toLocaleString()}
+                ${metadata.modelClass ? `<br><i class="fas fa-database"></i> Model class: ${metadata.modelClass}` : ''}
+            </div>
+        </div>
+    `;
+    
+    resultDiv.innerHTML = html;
+    
+    // Scroll to results
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ============================================
+// HELPER: Preview Image Before Upload
+// ============================================
+
+function previewImage(file) {
+    if (!file) return;
+    
+    const preview = document.getElementById('imagePreview');
+    const detectBtn = document.getElementById('detectBtn');
+    const resultDiv = document.getElementById('diseaseResult');
+    
+    // Clear previous results
+    resultDiv.innerHTML = '';
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        if (detectBtn) detectBtn.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
 
     // Login
     async function login() {

@@ -819,9 +819,382 @@ async function getNormalizedImageBuffer(imageBuffer) {
         return { success: false, error: error.message };
     }
 }
+// ============================================
+// DISEASE MAPPING FUNCTION
+// Converts model class names to display information
+// ============================================
+
+const diseaseMapping = {
+    // Tomato Diseases
+    'Tomato___Late_blight': {
+        displayName: 'Tomato Late Blight',
+        symptoms: 'Brown spots on leaves, white fungal growth, fruit rot',
+        severity: 'high',
+        affectedParts: ['leaves', 'stems', 'fruits'],
+        treatment: {
+            steps: [
+                'Remove and destroy infected leaves immediately',
+                'Apply copper-based fungicide every 7-10 days',
+                'Improve air circulation by pruning',
+                'Water at base only, avoid wetting leaves',
+                'Apply thick mulch to prevent soil splash',
+                'Rotate crops next season (3-4 year rotation)'
+            ],
+            organicSolution: 'Apply compost tea and neem oil weekly',
+            urgency: 'high'
+        }
+    },
+    'Tomato___Early_blight': {
+        displayName: 'Tomato Early Blight',
+        symptoms: 'Dark spots with concentric rings on lower leaves',
+        severity: 'medium',
+        affectedParts: ['leaves', 'stems'],
+        treatment: {
+            steps: [
+                'Remove infected leaves',
+                'Apply fungicide containing chlorothalonil',
+                'Mulch to prevent soil splash',
+                'Rotate crops',
+                'Avoid overhead watering'
+            ],
+            organicSolution: 'Apply copper spray or Bacillus subtilis',
+            urgency: 'medium'
+        }
+    },
+    'Tomato___healthy': {
+        displayName: 'Healthy Tomato Plant',
+        symptoms: 'No visible issues, vibrant green color',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular maintenance',
+                'Monitor weekly for early signs of disease',
+                'Maintain consistent watering schedule',
+                'Apply preventive organic sprays monthly'
+            ],
+            organicSolution: 'Apply compost tea monthly for immune support',
+            urgency: 'none'
+        }
+    },
+
+    // Potato Diseases
+    'Potato___Early_blight': {
+        displayName: 'Potato Early Blight',
+        symptoms: 'Dark concentric spots on leaves, yellowing',
+        severity: 'medium',
+        affectedParts: ['leaves', 'tubers'],
+        treatment: {
+            steps: [
+                'Remove infected foliage',
+                'Apply fungicide',
+                'Practice crop rotation',
+                'Use disease-free seed potatoes'
+            ],
+            organicSolution: 'Apply copper fungicide',
+            urgency: 'medium'
+        }
+    },
+    'Potato___Late_blight': {
+        displayName: 'Potato Late Blight',
+        symptoms: 'Dark lesions on leaves, white fungal growth, tuber rot',
+        severity: 'high',
+        affectedParts: ['leaves', 'stems', 'tubers'],
+        treatment: {
+            steps: [
+                'Destroy infected plants immediately',
+                'Apply copper-based fungicide',
+                'Harvest early if possible',
+                'Store tubers in dry conditions'
+            ],
+            organicSolution: 'Apply compost tea with beneficial microbes',
+            urgency: 'high'
+        }
+    },
+    'Potato___healthy': {
+        displayName: 'Healthy Potato Plant',
+        symptoms: 'No visible issues, healthy foliage',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular care',
+                'Monitor for early signs',
+                'Maintain proper irrigation'
+            ],
+            organicSolution: 'Apply compost tea monthly',
+            urgency: 'none'
+        }
+    },
+
+    // Corn/Maize Diseases
+    'Corn___Common_rust': {
+        displayName: 'Corn Common Rust',
+        symptoms: 'Rust-colored pustules on leaves',
+        severity: 'medium',
+        affectedParts: ['leaves'],
+        treatment: {
+            steps: [
+                'Use resistant varieties',
+                'Apply fungicide if severe',
+                'Crop rotation',
+                'Remove crop debris'
+            ],
+            organicSolution: 'Apply neem oil or sulfur',
+            urgency: 'medium'
+        }
+    },
+    'Corn___Northern_Leaf_Blight': {
+        displayName: 'Corn Northern Leaf Blight',
+        symptoms: 'Long cigar-shaped lesions on leaves',
+        severity: 'medium',
+        affectedParts: ['leaves'],
+        treatment: {
+            steps: [
+                'Use resistant hybrids',
+                'Crop rotation',
+                'Tillage to bury residue',
+                'Apply fungicide if necessary'
+            ],
+            organicSolution: 'Apply copper fungicide',
+            urgency: 'medium'
+        }
+    },
+    'Corn___healthy': {
+        displayName: 'Healthy Corn Plant',
+        symptoms: 'No visible issues, healthy growth',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular monitoring',
+                'Maintain proper nutrition',
+                'Irrigate as needed'
+            ],
+            organicSolution: 'Apply compost tea',
+            urgency: 'none'
+        }
+    },
+
+    // Apple Diseases
+    'Apple___Apple_scab': {
+        displayName: 'Apple Scab',
+        symptoms: 'Olive-green to black spots on leaves and fruit',
+        severity: 'medium',
+        affectedParts: ['leaves', 'fruit'],
+        treatment: {
+            steps: [
+                'Rake and remove fallen leaves',
+                'Apply fungicides in spring',
+                'Prune trees for air circulation',
+                'Use resistant varieties'
+            ],
+            organicSolution: 'Apply sulfur or neem oil',
+            urgency: 'medium'
+        }
+    },
+    'Apple___Cedar_apple_rust': {
+        displayName: 'Cedar Apple Rust',
+        symptoms: 'Yellow-orange spots on leaves, tubular structures',
+        severity: 'low',
+        affectedParts: ['leaves', 'fruit'],
+        treatment: {
+            steps: [
+                'Remove cedar trees near orchard',
+                'Apply fungicide',
+                'Use resistant varieties'
+            ],
+            organicSolution: 'Apply sulfur spray',
+            urgency: 'low'
+        }
+    },
+    'Apple___healthy': {
+        displayName: 'Healthy Apple Tree',
+        symptoms: 'No visible issues, healthy foliage',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular maintenance',
+                'Prune annually',
+                'Monitor for pests'
+            ],
+            organicSolution: 'Apply compost tea',
+            urgency: 'none'
+        }
+    },
+
+    // Grape Diseases
+    'Grape___Black_rot': {
+        displayName: 'Grape Black Rot',
+        symptoms: 'Brown spots on leaves, black mummified fruit',
+        severity: 'high',
+        affectedParts: ['leaves', 'fruit'],
+        treatment: {
+            steps: [
+                'Remove mummified fruit',
+                'Apply fungicide',
+                'Prune for air circulation',
+                'Remove infected plant parts'
+            ],
+            organicSolution: 'Apply copper fungicide',
+            urgency: 'high'
+        }
+    },
+    'Grape___healthy': {
+        displayName: 'Healthy Grape Vine',
+        symptoms: 'No visible issues, healthy growth',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular care',
+                'Prune properly',
+                'Monitor for early signs'
+            ],
+            organicSolution: 'Apply compost tea',
+            urgency: 'none'
+        }
+    },
+
+    // Peach Diseases
+    'Peach___Bacterial_spot': {
+        displayName: 'Peach Bacterial Spot',
+        symptoms: 'Small water-soaked spots on leaves and fruit',
+        severity: 'medium',
+        affectedParts: ['leaves', 'fruit'],
+        treatment: {
+            steps: [
+                'Use resistant varieties',
+                'Apply copper spray',
+                'Prune for air circulation',
+                'Avoid overhead irrigation'
+            ],
+            organicSolution: 'Apply copper fungicide',
+            urgency: 'medium'
+        }
+    },
+    'Peach___healthy': {
+        displayName: 'Healthy Peach Tree',
+        symptoms: 'No visible issues, healthy growth',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular care',
+                'Prune annually',
+                'Monitor for pests'
+            ],
+            organicSolution: 'Apply compost tea',
+            urgency: 'none'
+        }
+    },
+
+    // Strawberry Diseases
+    'Strawberry___Leaf_scorch': {
+        displayName: 'Strawberry Leaf Scorch',
+        symptoms: 'Purple to brown spots on leaves',
+        severity: 'medium',
+        affectedParts: ['leaves'],
+        treatment: {
+            steps: [
+                'Remove infected leaves',
+                'Improve air circulation',
+                'Apply fungicide',
+                'Avoid overhead watering'
+            ],
+            organicSolution: 'Apply neem oil',
+            urgency: 'medium'
+        }
+    },
+    'Strawberry___healthy': {
+        displayName: 'Healthy Strawberry Plant',
+        symptoms: 'No visible issues, healthy growth',
+        severity: 'none',
+        affectedParts: [],
+        treatment: {
+            steps: [
+                'Continue regular care',
+                'Mulch to prevent fruit rot',
+                'Monitor for pests'
+            ],
+            organicSolution: 'Apply compost tea',
+            urgency: 'none'
+        }
+    }
+};
+
+// Fallback mapping for unknown diseases
+const fallbackMapping = {
+    displayName: 'Unknown Disease Detected',
+    symptoms: 'Unable to identify specific disease from the image',
+    severity: 'medium',
+    affectedParts: [],
+    treatment: {
+        steps: [
+            'Consult local agricultural extension office',
+            'Take a sample to a plant clinic',
+            'Isolate affected plants',
+            'Document symptoms for expert identification'
+        ],
+        organicSolution: 'Apply neem oil as a general preventive measure',
+        urgency: 'medium'
+    }
+};
 
 // ============================================
-// DISEASE DETECTION ENDPOINT - UPDATED with preprocessing
+// MAPPING FUNCTION
+// ============================================
+
+/**
+ * Maps model class name to display information
+ * @param {string} className - The model output class name (e.g., 'Tomato___Late_blight')
+ * @param {number} confidence - The model's confidence score (0-1)
+ * @returns {object} Formatted disease information for frontend
+ */
+function mapDiseaseToDisplay(className, confidence) {
+    // Get mapping for this class name, or use fallback if not found
+    const mapping = diseaseMapping[className] || fallbackMapping;
+    
+    // Calculate confidence percentage
+    const confidencePercent = Math.round(confidence * 100);
+    
+    // Determine confidence level for UI styling
+    let confidenceLevel = 'low';
+    if (confidencePercent >= 85) confidenceLevel = 'high';
+    else if (confidencePercent >= 70) confidenceLevel = 'medium';
+    
+    return {
+        detection: {
+            name: mapping.displayName,
+            confidence: confidence,
+            confidencePercent: confidencePercent,
+            confidenceLevel: confidenceLevel,
+            symptoms: mapping.symptoms,
+            severity: mapping.severity,
+            affectedParts: mapping.affectedParts,
+            scientificName: className
+        },
+        treatment: mapping.treatment,
+        metadata: {
+            modelClass: className,
+            timestamp: new Date().toISOString()
+        }
+    };
+}
+
+/**
+ * Get list of all available diseases (for frontend reference)
+ */
+function getAvailableDiseases() {
+    return Object.keys(diseaseMapping).map(key => ({
+        modelClass: key,
+        displayName: diseaseMapping[key].displayName,
+        severity: diseaseMapping[key].severity
+    }));
+}
+// ============================================
+// DISEASE DETECTION ENDPOINT with MAPPING
 // ============================================
 app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) => {
     if (!req.file) {
@@ -829,76 +1202,34 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
     }
     
     try {
-        // STEP 1: Preprocess the image for ML model
+        // Step 1: Preprocess the image
         const processed = await preprocessImageForModel(req.file.buffer);
         
         if (!processed.success) {
             return res.status(400).json({ error: 'Image preprocessing failed: ' + processed.error });
         }
         
-        console.log('Image preprocessing complete:', processed.metadata);
+        // Step 2: Run inference (replace with your actual model call)
+        // For demo, we'll simulate model output
+        // In production, you would call your TensorFlow model here:
+        // const predictions = await model.predict(processed.tensor);
+        // const predictedClass = getPredictedClass(predictions);
+        // const confidence = getConfidence(predictions);
         
-        // Disease database with real information
-        const diseases = [
-            {
-                name: 'Tomato Late Blight',
-                confidence: 0.87,
-                symptoms: 'Brown spots on leaves, white fungal growth, fruit rot',
-                severity: 'high',
-                treatment: {
-                    steps: [
-                        'Remove and destroy infected leaves immediately',
-                        'Apply copper-based fungicide every 7-10 days',
-                        'Improve air circulation by pruning',
-                        'Water at base only, avoid wetting leaves',
-                        'Apply thick mulch to prevent soil splash'
-                    ],
-                    organic_solution: 'Apply compost tea and neem oil weekly'
-                }
-            },
-            {
-                name: 'Powdery Mildew',
-                confidence: 0.82,
-                symptoms: 'White powdery spots on leaves, stunted growth',
-                severity: 'medium',
-                treatment: {
-                    steps: [
-                        'Apply neem oil or sulfur-based fungicide',
-                        'Remove severely infected leaves',
-                        'Increase air circulation through pruning',
-                        'Avoid high-nitrogen fertilizers'
-                    ],
-                    organic_solution: 'Mix 1 tbsp baking soda + 1 tsp soap in 1 gallon water, spray weekly'
-                }
-            },
-            {
-                name: 'Healthy Plant',
-                confidence: 0.94,
-                symptoms: 'No visible issues, vibrant green color',
-                severity: 'none',
-                treatment: {
-                    steps: [
-                        'Continue regular maintenance',
-                        'Monitor weekly for early signs',
-                        'Maintain consistent watering'
-                    ],
-                    organic_solution: 'Apply compost tea monthly'
-                }
-            }
-        ];
+        // Simulated model output for demonstration
+        const possibleClasses = Object.keys(diseaseMapping);
+        const randomClass = possibleClasses[Math.floor(Math.random() * possibleClasses.length)];
+        const randomConfidence = 0.75 + (Math.random() * 0.2); // 0.75 - 0.95
         
-        // For demo, randomly select a disease
-        // In production, replace with actual ML model inference using processed.tensor
-        const detection = diseases[Math.floor(Math.random() * diseases.length)];
+        // Step 3: Map the model output to display information
+        const result = mapDiseaseToDisplay(randomClass, randomConfidence);
         
+        // Step 4: Return formatted response
         res.json({
-            detection: {
-                name: detection.name,
-                confidence: detection.confidence,
-                symptoms: detection.symptoms,
-                severity: detection.severity
-            },
-            treatment: detection.treatment,
+            success: true,
+            detection: result.detection,
+            treatment: result.treatment,
+            metadata: result.metadata,
             preprocessing: {
                 originalSize: processed.metadata.originalSize,
                 processedSize: processed.metadata.processedSize,
@@ -910,8 +1241,19 @@ app.post('/api/detect-disease', auth, upload.single('image'), async (req, res) =
         
     } catch (error) {
         console.error('Disease detection error:', error);
-        res.status(500).json({ error: 'Detection service error. Please try again.' });
+        res.status(500).json({ 
+            error: 'Detection service error. Please try again.',
+            details: error.message 
+        });
     }
+});
+
+// Optional: Endpoint to get list of available diseases
+app.get('/api/diseases/list', auth, (req, res) => {
+    res.json({
+        diseases: getAvailableDiseases(),
+        count: Object.keys(diseaseMapping).length
+    });
 });
 
 // ============================================
