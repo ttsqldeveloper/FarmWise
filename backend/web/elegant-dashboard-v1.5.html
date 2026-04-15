@@ -154,6 +154,323 @@
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+/* ============================================
+   DISEASE DETECTION ANIMATIONS
+   ============================================ */
+
+/* Fade In Animation for Results */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide In Animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Pulse Animation for Loading */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+}
+
+/* Spin Animation for Loader */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Progress Bar Animation */
+@keyframes progressBar {
+    from {
+        width: 0%;
+    }
+    to {
+        width: var(--target-width);
+    }
+}
+
+/* Shimmer Effect for Loading Skeleton */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Bounce Animation for Icons */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Glow Effect for Urgent Results */
+@keyframes glow {
+    0% {
+        box-shadow: 0 0 5px rgba(245, 101, 101, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(245, 101, 101, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(245, 101, 101, 0.2);
+    }
+}
+
+/* Ripple Effect for Buttons */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   ANIMATION CLASSES
+   ============================================ */
+
+/* Apply fadeIn to detection results */
+.detection-result {
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide in for list items */
+.detection-result li {
+    animation: slideIn 0.3s ease-out;
+    animation-fill-mode: both;
+}
+
+/* Staggered delay for list items */
+.detection-result li:nth-child(1) { animation-delay: 0.05s; }
+.detection-result li:nth-child(2) { animation-delay: 0.10s; }
+.detection-result li:nth-child(3) { animation-delay: 0.15s; }
+.detection-result li:nth-child(4) { animation-delay: 0.20s; }
+.detection-result li:nth-child(5) { animation-delay: 0.25s; }
+.detection-result li:nth-child(6) { animation-delay: 0.30s; }
+
+/* Pulse animation for loading state */
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Spinner animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #48bb78;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+/* Small spinner for buttons */
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #48bb78;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* Progress bar animation */
+.progress-fill {
+    animation: progressBar 0.8s ease-out;
+}
+
+/* Shimmer loading effect */
+.shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Bounce effect for icons */
+.result-icon {
+    animation: bounce 0.5s ease;
+}
+
+/* Glow effect for urgent results */
+.result-urgent {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Ripple effect for analyze button */
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple 0.6s linear;
+}
+
+/* ============================================
+   UPLOAD AREA ANIMATIONS
+   ============================================ */
+
+/* Hover animation for upload area */
+.disease-upload-area {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.disease-upload-area:hover {
+    transform: translateY(-2px);
+    border-color: #48bb78;
+    background: #f0fff4;
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+}
+
+/* Drag over state */
+.disease-upload-area.drag-over {
+    border-color: #48bb78;
+    background: #e6fffa;
+    transform: scale(1.02);
+}
+
+/* ============================================
+   IMAGE PREVIEW ANIMATIONS
+   ============================================ */
+
+/* Image preview fade in */
+.image-preview {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.image-preview.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Image preview hover effect */
+.image-preview:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   CONFIDENCE LEVEL ANIMATIONS
+   ============================================ */
+
+/* Confidence bar animation */
+.confidence-bar {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Confidence text pulse on high confidence */
+.confidence-high {
+    animation: pulse 2s ease-in-out;
+}
+
+/* ============================================
+   TOAST NOTIFICATION ANIMATION
+   ============================================ */
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.toast {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast.hide {
+    animation: slideOutRight 0.3s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE ANIMATIONS
+   ============================================ */
+
+/* Reduced motion preference - respect user settings */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Mobile optimization - smoother animations on touch devices */
+@media (max-width: 768px) {
+    .detection-result {
+        animation-duration: 0.3s;
+    }
+    
+    .disease-upload-area:hover {
+        transform: none;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -238,8 +555,8 @@
     <!-- Image Preview -->
     <img id="imagePreview" class="image-preview" alt="Image preview">
     
-    <!-- Analyze Button -->
-    <button id="detectBtn" onclick="detectDisease(document.getElementById('diseaseImage').files[0])" style="width: 100%; margin-top: 15px; display: none;">
+   <!-- Analyze Button WITH RIPPLE ANIMATION CLASS -->
+    <button id="detectBtn" class="btn-ripple" onclick="detectDisease(document.getElementById('diseaseImage').files[0])" style="width: 100%; margin-top: 15px; display: none;">
         <i class="fas fa-microscope"></i> Analyze Disease
     </button>
     
@@ -285,10 +602,89 @@
 
     // ── SERVER CONFIG ─────────────────────────────────────────────────────────
     const BASE_URL = 'https://farmwise-api-3qrl.onrender.com';
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+// Escape HTML to prevent XSS attacks
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Show toast notification
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+    const color = type === 'success' ? '#48bb78' : '#f56565';
+    toast.innerHTML = `<i class="fas fa-${icon}" style="color: ${color};"></i> <span>${escapeHtml(message)}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
     async function apiFetch(path, options = {}) {
         const url = path.startsWith('/api') ? BASE_URL + path : path;
         return fetch(url, options);
     }
+// ============================================
+// DRAG AND DROP ANIMATIONS
+// ============================================
+
+function setupDragAndDrop() {
+    const uploadArea = document.querySelector('.disease-upload-area');
+    if (!uploadArea) return;
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Highlight drop zone when item is dragged over
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Handle dropped files
+    uploadArea.addEventListener('drop', handleDrop, false);
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight(e) {
+        uploadArea.classList.add('drag-over');
+    }
+    
+    function unhighlight(e) {
+        uploadArea.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                previewImage(file);
+                // Trigger detection automatically (optional)
+                // detectDisease(file);
+            } else {
+                showToast('Please drop an image file', 'error');
+            }
+        }
+    }
+}
+
+// Call this after the DOM is loaded
+document.addEventListener('DOMContentLoaded', setupDragAndDrop);
     // ── END SERVER CONFIG ─────────────────────────────────────────────────────
 
     // Check server status
@@ -320,7 +716,207 @@
         };
         reader.readAsDataURL(file);
     }
+// ============================================
+// DISPLAY DISEASE DETECTION RESULTS
+// ============================================
 
+function displayDetectionResults(data) {
+    const resultDiv = document.getElementById('diseaseResult');
+    
+    if (!resultDiv) {
+        console.error('diseaseResult element not found');
+        return;
+    }
+    
+    // Extract data from response
+    const detection = data.detection;
+    const treatment = data.treatment;
+    const metadata = data.metadata || {};
+    
+    if (!detection) {
+        resultDiv.innerHTML = `
+            <div class="error" style="padding: 15px; background: #fed7d7; border-radius: 10px; color: #c53030;">
+                <i class="fas fa-exclamation-circle"></i> 
+                Invalid response format from server
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate confidence percentage
+    const confidencePercent = detection.confidencePercent || Math.round((detection.confidence || 0.85) * 100);
+    
+    // Determine confidence level styling
+    let confidenceClass = 'confidence-low';
+    let confidenceText = 'Low Confidence';
+    if (confidencePercent >= 85) {
+        confidenceClass = 'confidence-high';
+        confidenceText = 'High Confidence';
+    } else if (confidencePercent >= 70) {
+        confidenceClass = 'confidence-medium';
+        confidenceText = 'Medium Confidence';
+    }
+    
+    // Determine severity badge
+    let severityColor = '#48bb78';
+    let severityText = '✅ Healthy';
+    let severityIcon = 'fa-check-circle';
+    
+    switch (detection.severity) {
+        case 'high':
+            severityColor = '#f56565';
+            severityText = '⚠️ URGENT - Act Immediately';
+            severityIcon = 'fa-exclamation-triangle';
+            break;
+        case 'medium':
+            severityColor = '#ed8936';
+            severityText = '⚠️ Moderate - Address Soon';
+            severityIcon = 'fa-exclamation-circle';
+            break;
+        case 'low':
+            severityColor = '#ecc94b';
+            severityText = 'ℹ️ Low - Monitor';
+            severityIcon = 'fa-info-circle';
+            break;
+        case 'none':
+            severityColor = '#48bb78';
+            severityText = '✅ Healthy';
+            severityIcon = 'fa-check-circle';
+            break;
+        default:
+            severityColor = '#718096';
+            severityText = 'ℹ️ Information Only';
+            severityIcon = 'fa-info-circle';
+    }
+    
+    // Build the HTML
+    let html = `
+        <div class="detection-result" style="margin-top: 20px; background: #f7fafc; border-left: 4px solid ${severityColor}; border-radius: 12px; padding: 20px; animation: fadeIn 0.5s ease;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                <h3 style="color: #1a4731; margin: 0;">
+                    <i class="fas fa-microscope" style="color: ${severityColor};"></i> 
+                    Diagnosis Result
+                </h3>
+                <span style="background: ${severityColor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                    ${severityText}
+                </span>
+            </div>
+            
+            <!-- Disease Name -->
+            <div style="margin-bottom: 15px;">
+                <strong style="font-size: 1.1rem;">🦠 Disease:</strong>
+                <span style="font-size: 1.1rem; font-weight: 600; color: #2d3748;">${escapeHtml(detection.name)}</span>
+            </div>
+            
+            <!-- Confidence Score with Progress Bar -->
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong>🎯 Confidence:</strong>
+                    <span class="${confidenceClass}" style="font-weight: 600;">${confidencePercent}% (${confidenceText})</span>
+                </div>
+                <div style="background: #e2e8f0; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div style="width: ${confidencePercent}%; background: ${severityColor}; height: 100%; border-radius: 10px; transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+    `;
+    
+    // Affected Parts (if available)
+    if (detection.affectedParts && detection.affectedParts.length > 0) {
+        html += `
+            <div style="margin-bottom: 15px;">
+                <strong>📍 Affected Parts:</strong>
+                <div style="margin-top: 5px;">
+                    ${detection.affectedParts.map(part => `
+                        <span style="display: inline-block; background: #edf2f7; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-right: 8px; margin-bottom: 5px;">
+                            ${escapeHtml(part)}
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Symptoms
+    html += `
+        <div style="margin-bottom: 15px; background: white; padding: 12px; border-radius: 10px;">
+            <strong>📋 Symptoms:</strong>
+            <p style="margin-top: 8px; margin-bottom: 0; color: #4a5568;">${escapeHtml(detection.symptoms)}</p>
+        </div>
+    `;
+    
+    // Treatment Section
+    if (treatment && treatment.steps && treatment.steps.length > 0) {
+        html += `
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+                <strong>💊 Recommended Treatment:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
+                    ${treatment.steps.map(step => `<li style="margin-bottom: 8px;">${escapeHtml(step)}</li>`).join('')}
+                </ul>
+        `;
+        
+        if (treatment.organicSolution) {
+            html += `
+                <div style="background: #f0fff4; padding: 12px; border-radius: 10px; margin-top: 10px;">
+                    <strong>🌱 Organic Solution:</strong>
+                    <p style="margin-top: 5px; margin-bottom: 0; color: #2f855a;">${escapeHtml(treatment.organicSolution)}</p>
+                </div>
+            `;
+        }
+        
+        if (treatment.prevention && treatment.prevention.length > 0) {
+            html += `
+                <div style="margin-top: 15px;">
+                    <strong>🛡️ Prevention Tips:</strong>
+                    <ul style="margin-left: 20px; margin-top: 8px; margin-bottom: 0;">
+                        ${treatment.prevention.map(item => `<li style="margin-bottom: 5px;">${escapeHtml(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (treatment.urgency) {
+            const urgencyColors = {
+                high: '#f56565',
+                medium: '#ed8936',
+                low: '#ecc94b',
+                none: '#48bb78'
+            };
+            html += `
+                <div style="margin-top: 10px;">
+                    <span style="background: ${urgencyColors[treatment.urgency] || '#718096'}; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px;">
+                        ${treatment.urgency.toUpperCase()} Priority
+                    </span>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+    }
+    
+    // Scientific Name / Metadata
+    if (detection.scientificName) {
+        html += `
+            <div style="margin-top: 10px; font-size: 11px; color: #a0aec0;">
+                <i class="fas fa-database"></i> Scientific classification: ${escapeHtml(detection.scientificName)}
+            </div>
+        `;
+    }
+    
+    // Timestamp
+    html += `
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #a0aec0;">
+            <i class="far fa-clock"></i> Analysis completed: ${new Date().toLocaleString()}
+        </div>
+    `;
+    
+    html += `</div>`;
+    
+    resultDiv.innerHTML = html;
+    
+    // Scroll to results
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
   // ============================================
 // ENHANCED DISEASE DETECTION FUNCTION
 // Handles the new response format with confidence levels and treatment
@@ -366,7 +962,6 @@ async function detectDisease(file) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
-                // Don't set Content-Type - let browser set it with boundary
             },
             body: formData
         });
@@ -381,7 +976,7 @@ async function detectDisease(file) {
             throw new Error(data.error || 'Detection failed');
         }
         
-        // Display the results using the new format
+        // Display the results
         displayDetectionResults(data);
         
         showToast('Disease analysis complete!', 'success');
@@ -389,10 +984,10 @@ async function detectDisease(file) {
     } catch (error) {
         console.error('Disease detection error:', error);
         resultDiv.innerHTML = `
-            <div class="error" style="margin-top: 15px;">
+            <div class="error" style="margin-top: 15px; padding: 15px; background: #fed7d7; border-radius: 10px; color: #c53030;">
                 <i class="fas fa-exclamation-circle"></i> 
                 <strong>Detection failed</strong><br>
-                ${error.message}<br>
+                ${escapeHtml(error.message)}<br>
                 <small style="font-size: 12px;">Please try again with a clearer image.</small>
             </div>
         `;
@@ -828,6 +1423,7 @@ function previewImage(file) {
 
     // Initialize
     checkServer();
+
 </script>
 </body>
 </html>
