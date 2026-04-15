@@ -95,7 +95,38 @@ const auth = (req, res, next) => {
         return res.status(401).json({ error: 'Invalid token' });
     }
 };
-
+// ============================================
+// CHATBOT ENDPOINT (Protected by auth middleware)
+// ============================================
+app.post('/api/chatbot/ask', auth, (req, res) => {
+    const { question } = req.body;
+    
+    if (!question) {
+        return res.status(400).json({ error: 'Question required' });
+    }
+    
+    // Simple response logic
+    const q = question.toLowerCase();
+    let answer = '';
+    
+    if (q.includes('blight') || q.includes('tomato disease')) {
+        answer = "🍅 **Tomato Blight Treatment:**\n\n1. Remove infected leaves immediately\n2. Apply copper-based fungicide weekly\n3. Improve air circulation by pruning\n4. Avoid overhead watering\n5. Use mulch to prevent soil splash";
+    }
+    else if (q.includes('water') || q.includes('irrigation')) {
+        answer = "💧 **Watering Best Practices:**\n\n• Water early morning (5-7 AM)\n• Use drip irrigation for 30-50% water savings\n• Apply 2-3 inches of organic mulch\n• Check soil moisture before watering";
+    }
+    else if (q.includes('vaccine') || q.includes('vaccination')) {
+        answer = "💉 **Vaccination Schedule:**\n\n**Cattle:** Blackleg (annually), Anthrax (annually)\n**Goats:** PPR (annually), Enterotoxemia (every 6 months)\n**Poultry:** Newcastle (7-10 days, booster at 6 weeks)";
+    }
+    else if (q.includes('dry season') || q.includes('drought')) {
+        answer = "🌾 **Dry Season Preparation:**\n\n**For Crops:**\n1. Apply thick mulch\n2. Install drip irrigation\n3. Plant drought-resistant varieties\n\n**For Livestock:**\n1. Stockpile hay and silage\n2. Dig additional water storage\n3. Provide protein supplements";
+    }
+    else {
+        answer = "🌱 **FarmWise Assistant**\n\nI can help with:\n• Crop diseases and treatment\n• Watering schedules\n• Vaccination schedules\n• Animal feeding\n• Seasonal preparation\n\nWhat would you like to know?";
+    }
+    
+    res.json({ answer });
+});
 // ============================================
 // HEALTH CHECK
 // ============================================
@@ -1229,7 +1260,48 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'web', 'elegant-dashboard-v1.5.html'));
 });
-
+// ============================================
+// CHATBOT ENDPOINT
+// ============================================
+app.post('/api/chatbot/ask', auth, (req, res) => {
+    const { question } = req.body;
+    
+    if (!question) {
+        return res.status(400).json({ error: 'Question required' });
+    }
+    
+    // Simple response logic
+    const q = question.toLowerCase();
+    let answer = '';
+    
+    if (q.includes('blight') || q.includes('tomato disease')) {
+        answer = "🍅 **Tomato Blight Treatment:**\n\n1. Remove infected leaves immediately\n2. Apply copper-based fungicide weekly\n3. Improve air circulation by pruning\n4. Avoid overhead watering\n5. Use mulch to prevent soil splash";
+    }
+    else if (q.includes('water') || q.includes('irrigation')) {
+        answer = "💧 **Watering Best Practices:**\n\n• Water early morning (5-7 AM)\n• Use drip irrigation for 30-50% water savings\n• Apply 2-3 inches of organic mulch\n• Check soil moisture before watering";
+    }
+    else if (q.includes('vaccine') || q.includes('vaccination')) {
+        answer = "💉 **Vaccination Schedule:**\n\n**Cattle:** Blackleg (annually), Anthrax (annually)\n**Goats:** PPR (annually), Enterotoxemia (every 6 months)\n**Poultry:** Newcastle (7-10 days, booster at 6 weeks)";
+    }
+    else if (q.includes('dry season') || q.includes('drought')) {
+        answer = "🌾 **Dry Season Preparation:**\n\n**For Crops:**\n1. Apply thick mulch\n2. Install drip irrigation\n3. Plant drought-resistant varieties\n\n**For Livestock:**\n1. Stockpile hay and silage\n2. Dig additional water storage\n3. Provide protein supplements";
+    }
+    else {
+        answer = "🌱 **FarmWise Assistant**\n\nI can help with:\n• Crop diseases and treatment\n• Watering schedules\n• Vaccination schedules\n• Animal feeding\n• Seasonal preparation\n\nWhat would you like to know?";
+    }
+    
+    // Optional: Save to chat history
+    if (typeof chatHistory !== 'undefined') {
+        chatHistory.push({
+            user_id: req.user.userId,
+            question: question,
+            answer: answer,
+            created_at: new Date().toISOString()
+        });
+    }
+    
+    res.json({ answer });
+});
 // ============================================
 // START SERVER
 // ============================================
