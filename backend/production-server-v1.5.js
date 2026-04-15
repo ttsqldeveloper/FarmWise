@@ -239,44 +239,7 @@ app.get('/api/advice/personalized', auth, (req, res) => {
 // CROP KNOWLEDGE BASE
 // ============================================
 // Livestock knowledge base
-const livestockDatabase = {
-    cattle: {
-        name: 'Cattle',
-        feeding: 'Provide 2-3% of body weight in dry matter daily. Include minerals and clean water.',
-        health: 'Vaccinate for blackleg, anthrax, and BVD. Deworm every 3-4 months.',
-        housing: 'Provide shelter from extreme weather. Allow 20-30 sq ft per animal.',
-        breeding: 'Breed at 15-18 months. Gestation period is 9 months. Watch for heat signs every 21 days.'
-    },
-    goats: {
-        name: 'Goats',
-        feeding: 'Provide browse, hay, and grain. Need copper supplements (unlike sheep).',
-        health: 'Vaccinate for enterotoxemia and tetanus. Trim hooves every 6-8 weeks.',
-        housing: 'Need dry, draft-free shelter. Provide 15-20 sq ft per animal.',
-        breeding: 'Breed at 8-12 months. Gestation is 5 months. Kids need colostrum within first 6 hours.'
-    },
-    poultry: {
-        name: 'Poultry (Chickens)',
-        feeding: 'Provide complete feed appropriate for age (starter, grower, layer). Offer grit for digestion.',
-        health: 'Vaccinate for Marek\'s, Newcastle, and infectious bronchitis. Clean coop regularly.',
-        housing: 'Allow 2-3 sq ft per bird inside, 8-10 sq ft in run. Provide roosts and nest boxes.',
-        breeding: 'Egg production requires 14-16 hours of light daily. Collect eggs twice daily.'
-    },
-    sheep: {
-        name: 'Sheep',
-        feeding: 'Provide good quality hay or pasture. Avoid copper – sheep are sensitive.',
-        health: 'Vaccinate for enterotoxemia and tetanus. Trim hooves every 6-8 weeks.',
-        housing: 'Provide windbreaks and dry bedding. Allow 15-20 sq ft per animal.',
-        breeding: 'Breed in autumn. Gestation ~5 months. Lambs need colostrum.'
-    },
-    pigs: {
-        name: 'Pigs',
-        feeding: 'Provide balanced feed with protein (14-18%). Clean water always available.',
-        health: 'Vaccinate for erysipelas and parvovirus. Keep farrowing area clean.',
-        housing: 'Provide shelter with bedding. Allow 8-10 sq ft per pig.',
-        breeding: 'Breed at 8-9 months. Gestation 3 months, 3 weeks, 3 days.'
-    }
-    // Add more livestock as needed
-};
+
 
 // Helper to find livestock by name (case-insensitive, partial match)
 function findLivestock(query) {
